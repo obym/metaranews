@@ -24,7 +24,7 @@ export default function Layout() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar for desktop */}
-      <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-white border-r border-gray-200">
+      <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-white border-r border-gray-200 print:hidden">
         <div className="flex-1 flex flex-col min-h-0">
           <div className="flex items-center h-16 flex-shrink-0 px-4 bg-red-600">
             <h1 className="text-xl font-bold text-white">Metaranews.co</h1>
@@ -80,7 +80,7 @@ export default function Layout() {
       </div>
 
       {/* Mobile menu */}
-      <div className="md:hidden flex flex-col w-full">
+      <div className="md:hidden flex flex-col w-full print:hidden">
         <div className="flex items-center justify-between h-16 px-4 bg-red-600 sm:px-6 lg:px-8">
           <h1 className="text-xl font-bold text-white">Metaranews.co</h1>
           <button
@@ -134,10 +134,10 @@ export default function Layout() {
       </div>
 
       {/* Main content */}
-      <div className="flex flex-col w-0 flex-1 overflow-hidden md:pl-64">
-        <main className="flex-1 relative overflow-y-auto focus:outline-none">
-          <div className="py-6">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+      <div className="flex flex-col w-0 flex-1 overflow-hidden md:pl-64 print:pl-0 print:overflow-visible">
+        <main className="flex-1 relative overflow-y-auto focus:outline-none print:overflow-visible">
+          <div className="py-6 print:py-0">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 print:px-0 print:max-w-none">
               <Outlet />
             </div>
           </div>

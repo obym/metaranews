@@ -5,6 +5,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Printer, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
+
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url,
+).toString();
 
 interface Letter {
   id: string;
@@ -23,7 +31,12 @@ export default function LetterView() {
   const [letter, setLetter] = useState<Letter | null>(null);
   const [loading, setLoading] = useState(true);
   const [showPrintWarning, setShowPrintWarning] = useState(false);
+  const [numPages, setNumPages] = useState<number | null>(null);
   const componentRef = useRef<HTMLDivElement>(null);
+
+  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
+    setNumPages(numPages);
+  }
 
   useEffect(() => {
     const fetchLetter = async () => {
@@ -67,8 +80,8 @@ export default function LetterView() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="max-w-4xl mx-auto print:max-w-none print:w-full">
+      <div className="flex items-center justify-between mb-6 print:hidden">
         <div className="flex items-center">
           <button onClick={() => navigate('/letters')} className="mr-4 text-gray-500 hover:text-gray-700">
             <ArrowLeft className="h-6 w-6" />
@@ -87,7 +100,7 @@ export default function LetterView() {
       </div>
 
       {showPrintWarning && (
-        <div className="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-md">
+        <div className="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-md print:hidden">
           <div className="flex">
             <div className="ml-3">
               <h3 className="text-sm font-medium text-yellow-800">Perhatian: Fitur Cetak Diblokir di Preview</h3>
@@ -111,10 +124,10 @@ export default function LetterView() {
         </div>
       )}
 
-      <div className="bg-white shadow-lg overflow-hidden sm:rounded-lg p-8 overflow-x-auto">
+      <div className="bg-white shadow-lg overflow-hidden sm:rounded-lg p-8 overflow-x-auto print:shadow-none print:p-0 print:overflow-visible">
         <div 
           ref={componentRef} 
-          className="print-container bg-white p-8 mx-auto relative" 
+          className="print-container bg-white p-8 mx-auto relative print:p-0" 
           style={{ width: '210mm', minHeight: '297mm', color: '#000', fontFamily: 'Arial, sans-serif' }}
         >
           {/* Watermark */}
@@ -332,6 +345,40 @@ export default function LetterView() {
             </div>
           </div>
         </div>
+
+        {/* PDF Attachment for Surat Penawaran */}
+        {letter.type === 'penawaran' && (
+          <div className="mt-8 print:mt-0">
+            <div className="print:hidden mb-4 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-md">
+              <h3 className="text-sm font-medium text-blue-800">Lampiran Otomatis</h3>
+              <p className="mt-1 text-sm text-blue-700">
+                Dokumen di bawah ini akan otomatis ditambahkan pada halaman 2 dan seterusnya saat dicetak.
+              </p>
+            </div>
+            <Document
+              file="https://api.codetabs.com/v1/proxy?quest=https://drive.google.com/uc?export=download&id=16MUhUG_rwJiGwuGzgYKg4lCFnOWMbI-v"
+              onLoadSuccess={onDocumentLoadSuccess}
+              className="flex flex-col items-center"
+              loading={<div className="p-8 text-center text-gray-500">Memuat lampiran PDF...</div>}
+              error={<div className="p-8 text-center text-red-500">Gagal memuat lampiran PDF.</div>}
+            >
+              {Array.from(new Array(numPages || 0), (el, index) => (
+                <div 
+                  key={`page_${index + 1}`} 
+                  className="mb-8 print:mb-0 print:break-before-page bg-white shadow-lg print:shadow-none mx-auto relative"
+                  style={{ width: '210mm', minHeight: '297mm' }}
+                >
+                  <Page 
+                    pageNumber={index + 1} 
+                    width={794} // A4 width in pixels at 96 DPI (210mm)
+                    renderTextLayer={false}
+                    renderAnnotationLayer={false}
+                  />
+                </div>
+              ))}
+            </Document>
+          </div>
+        )}
       </div>
     </div>
   );
