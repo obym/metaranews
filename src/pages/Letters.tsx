@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, onSnapshot, deleteDoc, doc, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
-import { Plus, Eye, Trash2, FileText } from 'lucide-react';
+import { Plus, Eye, Trash2, Edit2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
@@ -118,10 +118,13 @@ export default function Letters() {
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{letter.clientName}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{formatCurrency(letter.subTotal)}</td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                        <Link to={`/letters/${letter.id}`} className="text-indigo-600 hover:text-indigo-900 mr-4 inline-block">
+                        <Link to={`/letters/${letter.id}`} className="text-indigo-600 hover:text-indigo-900 mr-4 inline-block" title="Lihat">
                           <Eye className="h-4 w-4" />
                         </Link>
-                        <button onClick={() => setDeleteId(letter.id)} className="text-red-600 hover:text-red-900 inline-block">
+                        <Link to={`/letters/${letter.id}/edit`} className="text-blue-600 hover:text-blue-900 mr-4 inline-block" title="Edit">
+                          <Edit2 className="h-4 w-4" />
+                        </Link>
+                        <button onClick={() => setDeleteId(letter.id)} className="text-red-600 hover:text-red-900 inline-block" title="Hapus">
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </td>

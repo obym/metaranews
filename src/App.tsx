@@ -29,6 +29,7 @@ export default function App() {
               <Route path="/clients" element={<Clients />} />
               <Route path="/letters" element={<Letters />} />
               <Route path="/letters/new" element={<LetterForm />} />
+              <Route path="/letters/:id/edit" element={<LetterForm />} />
               <Route path="/letters/:id" element={<LetterView />} />
               <Route path="/counters" element={<Counters />} />
               <Route path="/settings" element={<Settings />} />

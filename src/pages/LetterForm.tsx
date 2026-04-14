@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, getDocs, addDoc, doc, getDoc, setDoc, serverTimestamp, runTransaction, where } from 'firebase/firestore';
+import { collection, query, getDocs, addDoc, doc, getDoc, updateDoc, setDoc, serverTimestamp, runTransaction, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { Plus, Trash2, ArrowLeft } from 'lucide-react';
 
 interface Client {
@@ -25,7 +25,12 @@ export default function LetterForm() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const type = searchParams.get('type') as 'penawaran' | 'invoice' || 'penawaran';
+  const { id } = useParams();
+  const isEditMode = Boolean(id);
+  
+  const [type, setType] = useState<'penawaran' | 'invoice'>(
+    (searchParams.get('type') as 'penawaran' | 'invoice') || 'penawaran'
+  );
 
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClientId, setSelectedClientId] = useState('');
@@ -33,6 +38,7 @@ export default function LetterForm() {
   const [manualNumber, setManualNumber] = useState('');
   const [items, setItems] = useState<Item[]>([{ description: '', qty: 1, period: '', price: 0, total: 0 }]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(isEditMode);
 
   useEffect(() => {
     if (!user) return;
@@ -47,6 +53,36 @@ export default function LetterForm() {
     };
     fetchClients();
   }, [user]);
+
+  useEffect(() => {
+    if (!user || !isEditMode || !id) return;
+
+    const fetchLetter = async () => {
+      try {
+        const docRef = doc(db, 'letters', id);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists() && docSnap.data().ownerId === user.uid) {
+          const data = docSnap.data();
+          setType(data.type);
+          setSelectedClientId(data.clientId);
+          setDate(data.date.split('T')[0]);
+          setManualNumber(data.number);
+          setItems(data.items || []);
+        } else {
+          alert("Dokumen tidak ditemukan atau Anda tidak memiliki akses.");
+          navigate('/letters');
+        }
+      } catch (error) {
+        console.error("Error fetching letter:", error);
+        alert("Gagal memuat dokumen.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLetter();
+  }, [user, id, isEditMode, navigate]);
 
   const handleItemChange = (index: number, field: keyof Item, value: string | number) => {
     const newItems = [...items];
@@ -149,9 +185,21 @@ export default function LetterForm() {
     try {
       const selectedClient = clients.find(c => c.id === selectedClientId);
       const letterDate = new Date(date);
-      const generatedNumber = manualNumber.trim() !== '' ? manualNumber.trim() : await generateNumber(letterDate);
       
-      const newLetter = {
+      let generatedNumber = manualNumber.trim();
+      if (!generatedNumber && !isEditMode) {
+        generatedNumber = await generateNumber(letterDate);
+      } else if (!generatedNumber && isEditMode && id) {
+        // If editing and number is cleared, we should probably keep the old one or generate a new one.
+        // For safety, let's just require it or keep the existing.
+        const docRef = doc(db, 'letters', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          generatedNumber = docSnap.data().number;
+        }
+      }
+      
+      const letterData = {
         type,
         number: generatedNumber,
         date: letterDate.toISOString(),
@@ -162,18 +210,37 @@ export default function LetterForm() {
         subTotal,
         status: 'draft',
         ownerId: user.uid,
-        createdAt: serverTimestamp()
       };
       
-      const docRef = await addDoc(collection(db, 'letters'), newLetter);
-      navigate(`/letters/${docRef.id}`);
+      if (isEditMode && id) {
+        const docRef = doc(db, 'letters', id);
+        await updateDoc(docRef, {
+          ...letterData,
+          updatedAt: serverTimestamp()
+        });
+        navigate(`/letters/${id}`);
+      } else {
+        const docRef = await addDoc(collection(db, 'letters'), {
+          ...letterData,
+          createdAt: serverTimestamp()
+        });
+        navigate(`/letters/${docRef.id}`);
+      }
     } catch (error) {
-      console.error("Error creating letter:", error);
-      alert("Gagal membuat dokumen.");
+      console.error("Error saving letter:", error);
+      alert("Gagal menyimpan dokumen.");
     } finally {
       setIsSaving(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -182,7 +249,7 @@ export default function LetterForm() {
           <ArrowLeft className="h-6 w-6" />
         </button>
         <h1 className="text-2xl font-semibold text-gray-900">
-          Buat {type === 'invoice' ? 'Invoice' : 'Surat Penawaran'} Baru
+          {isEditMode ? 'Edit' : 'Buat'} {type === 'invoice' ? 'Invoice' : 'Surat Penawaran'} {isEditMode ? '' : 'Baru'}
         </h1>
       </div>
 

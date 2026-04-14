@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useReactToPrint } from 'react-to-print';
 import { Printer, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
@@ -45,10 +44,9 @@ export default function LetterView() {
     fetchLetter();
   }, [id]);
 
-  const handlePrint = useReactToPrint({
-    contentRef: componentRef,
-    documentTitle: letter ? `${letter.type === 'invoice' ? 'Invoice' : 'Penawaran'}_${letter.number.replace(/\//g, '_')}` : 'Document',
-  });
+  const handlePrint = () => {
+    window.print();
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(amount);
@@ -85,28 +83,39 @@ export default function LetterView() {
       <div className="bg-white shadow-lg overflow-hidden sm:rounded-lg p-8 overflow-x-auto">
         <div 
           ref={componentRef} 
-          className="print-container bg-white p-8 mx-auto" 
+          className="print-container bg-white p-8 mx-auto relative" 
           style={{ width: '210mm', minHeight: '297mm', color: '#000', fontFamily: 'Arial, sans-serif' }}
         >
-          {/* Header */}
-          <div className="flex justify-between items-start border-b-2 border-red-600 pb-4 mb-8">
-            <div className="w-1/3">
-              {/* Placeholder for Logo */}
-              <div className="flex flex-col items-center w-32">
-                <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center relative overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center text-red-600 font-bold text-6xl">M</div>
-                </div>
-                <div className="text-red-600 font-bold text-xl mt-2">Metara</div>
-                <div className="text-red-600 text-[10px]">Setara Bercerita</div>
-              </div>
-            </div>
-            <div className="w-2/3 text-right">
-              <h1 className="text-2xl font-bold text-red-600">PT. PORTAL DIGITAL MEDIA<br/>NUSANTARA</h1>
-              <p className="text-sm mt-1">Jl. Raya Kediri - Pare No. 30<br/>Dsn. Ngrancangan Ds. Wonojoyo Kec. Gurah Kab. Kediri<br/>Telp. 0354-4545845 - +62 811-3500-466</p>
-            </div>
+          {/* Watermark */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] z-0">
+            <img 
+              src="https://lh3.googleusercontent.com/d/1kwvd_i_n0IWw59fxQEnVD36mqEp7n1iA" 
+              alt="Watermark" 
+              className="w-[600px] h-auto object-contain"
+              referrerPolicy="no-referrer"
+            />
           </div>
 
-          {letter.type === 'invoice' ? (
+          {/* Header */}
+          <div className="flex justify-between items-start mb-8 relative z-10">
+            <div className="w-1/3">
+              <img 
+                src="https://lh3.googleusercontent.com/d/1kwvd_i_n0IWw59fxQEnVD36mqEp7n1iA" 
+                alt="Metaranews Logo" 
+                className="h-24 w-auto object-contain"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+            <div className="w-2/3 text-right pr-6">
+              <h1 className="text-2xl font-bold text-[#b31b1b]">PT. PORTAL DIGITAL MEDIA<br/>NUSANTARA</h1>
+              <p className="text-sm mt-1 font-medium text-gray-800">Jl. Raya Kediri - Pare No. 30<br/>Dsn. Ngrancangan Ds. Wonojoyo Kec. Gurah Kab. Kediri<br/>Telp. 0354-4545845 - +62 811-3500-466</p>
+            </div>
+            {/* Red shape on the right edge */}
+            <div className="absolute top-0 right-[-2rem] w-8 h-24 bg-[#b31b1b] rounded-l-2xl"></div>
+          </div>
+
+          <div className="relative z-10">
+            {letter.type === 'invoice' ? (
             /* INVOICE TEMPLATE */
             <>
               <div className="text-right mb-8">
@@ -125,34 +134,34 @@ export default function LetterView() {
                 </div>
               </div>
 
-              <table className="w-full mb-8 border-collapse">
+              <table className="w-full mb-8 border-collapse border border-gray-800">
                 <thead>
                   <tr className="bg-[#7a1c1c] text-white">
-                    <th className="py-3 px-4 text-left font-bold">DESKRIPSI</th>
-                    <th className="py-3 px-4 text-center font-bold">QTY</th>
-                    <th className="py-3 px-4 text-center font-bold">PERIODE<br/>TAYANG</th>
-                    <th className="py-3 px-4 text-right font-bold">HARGA</th>
-                    <th className="py-3 px-4 text-right font-bold">TOTAL</th>
+                    <th className="py-3 px-4 text-left font-bold border border-gray-800">DESKRIPSI</th>
+                    <th className="py-3 px-4 text-center font-bold border border-gray-800">QTY</th>
+                    <th className="py-3 px-4 text-center font-bold border border-gray-800">PERIODE<br/>TAYANG</th>
+                    <th className="py-3 px-4 text-right font-bold border border-gray-800">HARGA</th>
+                    <th className="py-3 px-4 text-right font-bold border border-gray-800">TOTAL</th>
                   </tr>
                 </thead>
                 <tbody>
                   {letter.items.map((item, index) => (
                     <tr key={index} className="bg-[#e6e6e6]">
-                      <td className="py-4 px-4 text-sm">{item.description}</td>
-                      <td className="py-4 px-4 text-center text-sm">{item.qty}</td>
-                      <td className="py-4 px-4 text-center text-sm">{item.period}</td>
-                      <td className="py-4 px-4 text-right text-sm">{formatCurrency(item.price)}</td>
-                      <td className="py-4 px-4 text-right text-sm">{formatCurrency(item.total)}</td>
+                      <td className="py-4 px-4 text-sm border border-gray-800">{item.description}</td>
+                      <td className="py-4 px-4 text-center text-sm border border-gray-800">{item.qty}</td>
+                      <td className="py-4 px-4 text-center text-sm border border-gray-800">{item.period}</td>
+                      <td className="py-4 px-4 text-right text-sm border border-gray-800">{formatCurrency(item.price)}</td>
+                      <td className="py-4 px-4 text-right text-sm border border-gray-800">{formatCurrency(item.total)}</td>
                     </tr>
                   ))}
                   {/* Fill empty space if items are few */}
                   {Array.from({ length: Math.max(0, 3 - letter.items.length) }).map((_, i) => (
                     <tr key={`empty-${i}`} className="bg-[#e6e6e6]">
-                      <td className="py-4 px-4">&nbsp;</td>
-                      <td className="py-4 px-4">&nbsp;</td>
-                      <td className="py-4 px-4">&nbsp;</td>
-                      <td className="py-4 px-4">&nbsp;</td>
-                      <td className="py-4 px-4">&nbsp;</td>
+                      <td className="py-4 px-4 border border-gray-800">&nbsp;</td>
+                      <td className="py-4 px-4 border border-gray-800">&nbsp;</td>
+                      <td className="py-4 px-4 border border-gray-800">&nbsp;</td>
+                      <td className="py-4 px-4 border border-gray-800">&nbsp;</td>
+                      <td className="py-4 px-4 border border-gray-800">&nbsp;</td>
                     </tr>
                   ))}
                 </tbody>
@@ -178,7 +187,8 @@ export default function LetterView() {
 
               <div className="mt-16 text-center">
                 <p className="text-sm mb-16">HORMAT KAMI,<br/>PT. PORTAL DIGITAL MEDIA NUSANTARA</p>
-                <p className="text-sm font-bold">IMAM MUBAROQ, S.SOS.I<br/>PIMPINAN REDAKSI</p>
+                <p className="text-sm font-bold underline">MOH. MUHSON AGIL S.</p>
+                <p className="text-sm font-bold">DIREKTUR</p>
               </div>
             </>
           ) : (
@@ -256,10 +266,6 @@ export default function LetterView() {
               </div>
             </>
           )}
-          
-          {/* Footer for both */}
-          <div className="mt-16 border-t-8 border-red-600 pt-2 flex items-center text-xs text-white bg-red-600 px-4 py-2">
-             <span className="mr-4">METARANEWS</span>
           </div>
         </div>
       </div>
