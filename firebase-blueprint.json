@@ -1,0 +1,76 @@
+{
+  "entities": {
+    "Client": {
+      "title": "Client",
+      "description": "A client or advertiser",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Company or client name" },
+        "address": { "type": "string", "description": "Client address" },
+        "contactPerson": { "type": "string", "description": "Contact person name" },
+        "phone": { "type": "string", "description": "Contact phone number" },
+        "email": { "type": "string", "description": "Contact email" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "ownerId": { "type": "string", "description": "User ID of the creator" }
+      },
+      "required": ["name", "ownerId", "createdAt"]
+    },
+    "Letter": {
+      "title": "Letter",
+      "description": "A generated letter (Penawaran or Invoice)",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["penawaran", "invoice"] },
+        "number": { "type": "string", "description": "Generated letter number" },
+        "date": { "type": "string", "format": "date-time" },
+        "clientId": { "type": "string", "description": "Reference to Client ID" },
+        "clientName": { "type": "string" },
+        "clientAddress": { "type": "string" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": { "type": "string" },
+              "qty": { "type": "number" },
+              "period": { "type": "string" },
+              "price": { "type": "number" },
+              "total": { "type": "number" }
+            }
+          }
+        },
+        "subTotal": { "type": "number" },
+        "status": { "type": "string", "enum": ["draft", "sent", "paid", "cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "ownerId": { "type": "string", "description": "User ID of the creator" }
+      },
+      "required": ["type", "number", "date", "clientId", "ownerId", "createdAt"]
+    },
+    "Counter": {
+      "title": "Counter",
+      "description": "Keeps track of letter numbers",
+      "type": "object",
+      "properties": {
+        "penawaranCount": { "type": "number" },
+        "invoiceCount": { "type": "number" },
+        "month": { "type": "number" },
+        "year": { "type": "number" }
+      },
+      "required": ["penawaranCount", "invoiceCount", "month", "year"]
+    }
+  },
+  "firestore": {
+    "/clients/{clientId}": {
+      "schema": { "$ref": "#/entities/Client" },
+      "description": "Stores client information"
+    },
+    "/letters/{letterId}": {
+      "schema": { "$ref": "#/entities/Letter" },
+      "description": "Stores generated letters and invoices"
+    },
+    "/counters/{counterId}": {
+      "schema": { "$ref": "#/entities/Counter" },
+      "description": "Stores counters for auto-incrementing letter numbers"
+    }
+  }
+}

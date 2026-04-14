@@ -1,0 +1,84 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.ownerId;
+    }
+
+    function uidUnchanged() {
+      return !('ownerId' in request.resource.data) || request.resource.data.ownerId == request.auth.uid;
+    }
+
+    function uidNotModified() {
+      return !('ownerId' in request.resource.data) || request.resource.data.ownerId == resource.data.ownerId;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function isValidClient(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() < 200 &&
+             (!('address' in data) || (data.address is string && data.address.size() < 500)) &&
+             (!('contactPerson' in data) || (data.contactPerson is string && data.contactPerson.size() < 100)) &&
+             (!('phone' in data) || (data.phone is string && data.phone.size() < 50)) &&
+             (!('email' in data) || (data.email is string && data.email.size() < 100));
+    }
+
+    function isValidLetter(data) {
+      return data.type in ['penawaran', 'invoice'] &&
+             data.number is string && data.number.size() > 0 && data.number.size() < 100 &&
+             data.clientId is string && data.clientId.size() > 0 &&
+             data.items is list && data.items.size() <= 100 &&
+             data.subTotal is number && data.subTotal >= 0;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /clients/{clientId} {
+      allow read: if isAuthenticated() && (resource == null || resource.data.ownerId == request.auth.uid);
+      allow create: if isAuthenticated() && 
+                    hasRequiredFields(['name', 'ownerId', 'createdAt']) && 
+                    isValidClient(request.resource.data) && 
+                    uidUnchanged();
+      allow update: if isAuthenticated() && 
+                    isDocOwner() && 
+                    isValidClient(request.resource.data) && 
+                    uidNotModified();
+      allow delete: if isAuthenticated() && isDocOwner();
+    }
+
+    match /letters/{letterId} {
+      allow read: if isAuthenticated() && (resource == null || resource.data.ownerId == request.auth.uid);
+      allow create: if isAuthenticated() && 
+                    hasRequiredFields(['type', 'number', 'date', 'clientId', 'ownerId', 'createdAt']) && 
+                    isValidLetter(request.resource.data) && 
+                    uidUnchanged();
+      allow update: if isAuthenticated() && 
+                    isDocOwner() && 
+                    isValidLetter(request.resource.data) && 
+                    uidNotModified();
+      allow delete: if isAuthenticated() && isDocOwner();
+    }
+
+    match /counters/{counterId} {
+      // Allow read/write to counters for authenticated users (scoped by user ID in the app)
+      allow read: if isAuthenticated() && counterId == request.auth.uid;
+      allow write: if isAuthenticated() && counterId == request.auth.uid;
+    }
+  }
+}
