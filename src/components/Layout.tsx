@@ -22,7 +22,7 @@ export default function Layout() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex print:block print:bg-white print:min-h-0">
       {/* Sidebar for desktop */}
       <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-white border-r border-gray-200 print:hidden">
         <div className="flex-1 flex flex-col min-h-0">
@@ -134,10 +134,10 @@ export default function Layout() {
       </div>
 
       {/* Main content */}
-      <div className="flex flex-col w-0 flex-1 overflow-hidden md:pl-64 print:pl-0 print:overflow-visible">
-        <main className="flex-1 relative overflow-y-auto focus:outline-none print:overflow-visible">
+      <div className="flex flex-col w-0 flex-1 overflow-hidden md:pl-64 print:pl-0 print:block print:overflow-visible print:w-full">
+        <main className="flex-1 relative overflow-y-auto focus:outline-none print:overflow-visible print:static">
           <div className="py-6 print:py-0">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 print:px-0 print:max-w-none">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 print:px-0 print:max-w-none print:mx-0">
               <Outlet />
             </div>
           </div>

@@ -124,10 +124,10 @@ export default function LetterView() {
         </div>
       )}
 
-      <div className="bg-white shadow-lg overflow-hidden sm:rounded-lg p-8 overflow-x-auto print:shadow-none print:p-0 print:overflow-visible">
+      <div className="bg-white shadow-lg overflow-hidden sm:rounded-lg p-8 overflow-x-auto print:shadow-none print:p-0 print:overflow-visible print:block">
         <div 
           ref={componentRef} 
-          className="print-container bg-white p-8 mx-auto relative print:p-0" 
+          className="print-container bg-white p-8 mx-auto relative print:p-0 print:block" 
           style={{ width: '210mm', minHeight: '297mm', color: '#000', fontFamily: 'Arial, sans-serif' }}
         >
           {/* Watermark */}
@@ -348,7 +348,7 @@ export default function LetterView() {
 
         {/* PDF Attachment for Surat Penawaran */}
         {letter.type === 'penawaran' && (
-          <div className="mt-8 print:mt-0">
+          <div className="mt-8 print:mt-0 print:block">
             <div className="print:hidden mb-4 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-md">
               <h3 className="text-sm font-medium text-blue-800">Lampiran Otomatis</h3>
               <p className="mt-1 text-sm text-blue-700">
@@ -365,7 +365,7 @@ export default function LetterView() {
               {Array.from(new Array(numPages || 0), (el, index) => (
                 <div 
                   key={`page_${index + 1}`} 
-                  className="mb-8 print:mb-0 print:break-before-page bg-white shadow-lg print:shadow-none mx-auto relative"
+                  className="mb-8 print:mb-0 break-before-page bg-white shadow-lg print:shadow-none mx-auto relative print:block"
                   style={{ width: '210mm', minHeight: '297mm' }}
                 >
                   <Page 
@@ -373,6 +373,7 @@ export default function LetterView() {
                     width={794} // A4 width in pixels at 96 DPI (210mm)
                     renderTextLayer={false}
                     renderAnnotationLayer={false}
+                    renderMode="svg"
                   />
                 </div>
               ))}
