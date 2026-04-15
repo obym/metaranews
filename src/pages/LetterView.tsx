@@ -146,16 +146,16 @@ export default function LetterView() {
               <img 
                 src="https://lh3.googleusercontent.com/d/1kwvd_i_n0IWw59fxQEnVD36mqEp7n1iA" 
                 alt="Metaranews Logo" 
-                className="h-32 w-auto object-contain -mt-4"
+                className="h-32 w-auto object-contain mt-2"
                 referrerPolicy="no-referrer"
               />
             </div>
-            <div className="w-2/3 text-right pr-6">
+            <div className="w-2/3 text-right pr-6 mt-4">
               <h1 className="text-2xl font-bold text-[#b31b1b]">PT. PORTAL DIGITAL MEDIA<br/>NUSANTARA</h1>
               <p className="text-sm mt-1 font-medium text-gray-800">Jl. Raya Kediri - Pare No. 30<br/>Dsn. Ngrancangan Ds. Wonojoyo Kec. Gurah Kab. Kediri<br/>Telp. 0354-4545845 - +62 811-3500-466</p>
             </div>
             {/* Red shape on the right edge */}
-            <div className="absolute top-0 right-[-2rem] w-8 h-24 bg-[#b31b1b] rounded-l-2xl"></div>
+            <div className="absolute top-0 right-[-2rem] w-8 h-28 bg-[#b31b1b] rounded-l-2xl"></div>
           </div>
 
           <div className="relative z-10">
@@ -354,6 +354,14 @@ export default function LetterView() {
               <p className="mt-1 text-sm text-blue-700">
                 Dokumen di bawah ini akan otomatis ditambahkan pada halaman 2 dan seterusnya saat dicetak.
               </p>
+              <a 
+                href="https://drive.google.com/file/d/16MUhUG_rwJiGwuGzgYKg4lCFnOWMbI-v/view?usp=sharing" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="mt-2 inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500"
+              >
+                Buka file asli di Google Drive <span className="ml-1">↗</span>
+              </a>
             </div>
             <Document
               file="/lampiran_penawaran.pdf"
