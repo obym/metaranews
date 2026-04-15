@@ -356,7 +356,7 @@ export default function LetterView() {
               </p>
             </div>
             <Document
-              file="https://api.codetabs.com/v1/proxy?quest=https://drive.google.com/uc?export=download&id=16MUhUG_rwJiGwuGzgYKg4lCFnOWMbI-v"
+              file="/lampiran_penawaran.pdf"
               onLoadSuccess={onDocumentLoadSuccess}
               className="flex flex-col items-center"
               loading={<div className="p-8 text-center text-gray-500">Memuat lampiran PDF...</div>}
