@@ -5,14 +5,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Printer, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
-import { Document, Page, pdfjs } from 'react-pdf';
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
-
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url,
-).toString();
 
 interface Letter {
   id: string;
@@ -31,12 +23,7 @@ export default function LetterView() {
   const [letter, setLetter] = useState<Letter | null>(null);
   const [loading, setLoading] = useState(true);
   const [showPrintWarning, setShowPrintWarning] = useState(false);
-  const [numPages, setNumPages] = useState<number | null>(null);
   const componentRef = useRef<HTMLDivElement>(null);
-
-  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
-    setNumPages(numPages);
-  }
 
   useEffect(() => {
     const fetchLetter = async () => {
@@ -128,7 +115,7 @@ export default function LetterView() {
         <div 
           ref={componentRef} 
           className="print-container bg-white p-8 mx-auto relative print:p-0 print:block" 
-          style={{ width: '210mm', minHeight: '297mm', color: '#000', fontFamily: 'Arial, sans-serif' }}
+          style={{ width: '210mm', minHeight: '330mm', color: '#000', fontFamily: 'Arial, sans-serif' }}
         >
           {/* Watermark */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] z-0">
@@ -345,49 +332,6 @@ export default function LetterView() {
             </div>
           </div>
         </div>
-
-        {/* PDF Attachment for Surat Penawaran */}
-        {letter.type === 'penawaran' && (
-          <div className="mt-8 print:mt-0 print:block">
-            <div className="print:hidden mb-4 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-md">
-              <h3 className="text-sm font-medium text-blue-800">Lampiran Otomatis</h3>
-              <p className="mt-1 text-sm text-blue-700">
-                Dokumen di bawah ini akan otomatis ditambahkan pada halaman 2 dan seterusnya saat dicetak.
-              </p>
-              <a 
-                href="https://drive.google.com/file/d/16MUhUG_rwJiGwuGzgYKg4lCFnOWMbI-v/view?usp=sharing" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="mt-2 inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500"
-              >
-                Buka file asli di Google Drive <span className="ml-1">↗</span>
-              </a>
-            </div>
-            <Document
-              file="/lampiran_penawaran.pdf"
-              onLoadSuccess={onDocumentLoadSuccess}
-              className="flex flex-col items-center"
-              loading={<div className="p-8 text-center text-gray-500">Memuat lampiran PDF...</div>}
-              error={<div className="p-8 text-center text-red-500">Gagal memuat lampiran PDF.</div>}
-            >
-              {Array.from(new Array(numPages || 0), (el, index) => (
-                <div 
-                  key={`page_${index + 1}`} 
-                  className="mb-8 print:mb-0 break-before-page bg-white shadow-lg print:shadow-none mx-auto relative print:block"
-                  style={{ width: '210mm', minHeight: '297mm' }}
-                >
-                  <Page 
-                    pageNumber={index + 1} 
-                    width={794} // A4 width in pixels at 96 DPI (210mm)
-                    renderTextLayer={false}
-                    renderAnnotationLayer={false}
-                    renderMode="svg"
-                  />
-                </div>
-              ))}
-            </Document>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+@page {
+  size: 210mm 330mm; /* F4 paper size */
+  margin: 0;
+}
+
 @media print {
   html, body {
     height: auto !important;
