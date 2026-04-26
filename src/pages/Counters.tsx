@@ -113,7 +113,10 @@ export default function Counters() {
                   <thead className="bg-gray-50">
                     <tr>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Nomor Surat
+                        No. Urut
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Format Surat
                       </th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Nama Perusahaan
@@ -124,10 +127,17 @@ export default function Counters() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {letters.map((letter) => (
+                    {letters.map((letter) => {
+                      const slashIndex = letter.number ? letter.number.indexOf('/') : -1;
+                      const urut = slashIndex > -1 ? letter.number.substring(0, slashIndex) : letter.number;
+                      const format = slashIndex > -1 ? letter.number.substring(slashIndex) : '';
+                      return (
                       <tr key={letter.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {letter.number}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 border-r border-gray-100 bg-gray-50">
+                          {urut}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
+                          {format || '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {letter.clientName}
@@ -143,10 +153,10 @@ export default function Counters() {
                           )}
                         </td>
                       </tr>
-                    ))}
+                    )})}
                     {letters.length === 0 && (
                       <tr>
-                        <td colSpan={3} className="px-6 py-8 text-center text-sm text-gray-500">
+                        <td colSpan={4} className="px-6 py-8 text-center text-sm text-gray-500">
                           Belum ada surat yang dikeluarkan.
                         </td>
                       </tr>
