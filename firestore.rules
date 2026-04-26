@@ -67,7 +67,7 @@ service cloud.firestore {
     }
 
     match /letters/{letterId} {
-      allow read: if isAuthenticated() && (resource == null || isAdmin() || resource.data.ownerId == request.auth.uid);
+      allow read: if isAuthenticated();
       allow create: if isAuthenticated() && 
                     hasRequiredFields(['type', 'number', 'date', 'clientId', 'ownerId', 'createdAt']) && 
                     isValidLetter(request.resource.data) && 

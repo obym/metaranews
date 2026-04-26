@@ -20,9 +20,7 @@ export default function Counters() {
   useEffect(() => {
     if (!user) return;
 
-    const q = role === 'admin'
-      ? query(collection(db, 'letters'))
-      : query(collection(db, 'letters'), where('ownerId', '==', user.uid));
+    const q = query(collection(db, 'letters'));
       
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       const lettersData: Letter[] = [];

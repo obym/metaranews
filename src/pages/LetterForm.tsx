@@ -123,70 +123,42 @@ export default function LetterForm() {
     let newNumber = '';
     
     try {
-      // Find the highest count from all counters (including legacy user-specific counters)
-      let maxLegacyCount = 0;
-      let maxLegacyInvoiceCount = 0;
-      try {
-        const countersSnap = await getDocs(collection(db, 'counters'));
-        countersSnap.forEach((doc) => {
-          const data = doc.data();
-          if (data.year === year) {
-            if (data.penawaranCount > maxLegacyCount) {
-              maxLegacyCount = data.penawaranCount;
-            }
-            if (data.invoiceCount > maxLegacyInvoiceCount) {
-              maxLegacyInvoiceCount = data.invoiceCount;
-            }
-          }
-        });
-      } catch (err) {
-        console.error("Error reading legacy counters:", err);
-      }
-
-      await runTransaction(db, async (transaction) => {
-        const counterRef = doc(db, 'counters', 'global');
-        const counterDoc = await transaction.get(counterRef);
-        
-        let currentCount = type === 'penawaran' ? maxLegacyCount : maxLegacyInvoiceCount;
-        let globalPenawaranCount = maxLegacyCount;
-        let globalInvoiceCount = maxLegacyInvoiceCount;
-        
-        if (counterDoc.exists()) {
-          const data = counterDoc.data();
-          if (data.year === year) {
-             globalPenawaranCount = Math.max(maxLegacyCount, data.penawaranCount || 0);
-             globalInvoiceCount = Math.max(maxLegacyInvoiceCount, data.invoiceCount || 0);
-             currentCount = type === 'penawaran' ? globalPenawaranCount : globalInvoiceCount;
+      let maxCount = 0;
+      
+      const lettersSnap = await getDocs(collection(db, 'letters'));
+      lettersSnap.forEach((doc) => {
+        const data = doc.data();
+        if (!data.date) return;
+        const lDate = new Date(data.date);
+        if (lDate.getFullYear() === year && data.type === type) {
+          const numStr = data.number || '';
+          const slashIndex = numStr.indexOf('/');
+          const prefix = slashIndex > -1 ? numStr.substring(0, slashIndex) : numStr;
+          const num = parseInt(prefix, 10);
+          if (!isNaN(num) && num > maxCount) {
+             maxCount = num;
           }
         }
-        
-        const nextCount = currentCount + 1;
-        
-        if (type === 'penawaran') {
-          newNumber = `${nextCount}/METARA/${romanMonth}/${year}`;
-        } else {
-          newNumber = `${nextCount}/SPJ/METARA/${romanMonth}/${year}`;
-        }
-        
-        const updateData: any = {
-          month,
-          year,
-        };
-        
-        if (type === 'penawaran') {
-          updateData.penawaranCount = nextCount;
-          updateData.invoiceCount = globalInvoiceCount;
-        } else {
-          updateData.invoiceCount = nextCount;
-          updateData.penawaranCount = globalPenawaranCount;
-        }
-        
-        transaction.set(counterRef, updateData, { merge: true });
       });
+      
+      const nextCount = maxCount + 1;
+      
+      if (type === 'penawaran') {
+        newNumber = `${nextCount}/METARA/${romanMonth}/${year}`;
+      } else {
+        newNumber = `${nextCount}/SPJ/METARA/${romanMonth}/${year}`;
+      }
+      
+      const counterRef = doc(db, 'counters', 'global');
+      await setDoc(counterRef, {
+        year: year,
+        month: month,
+        [type === 'penawaran' ? 'penawaranCount' : 'invoiceCount']: nextCount
+      }, { merge: true });
       
       return newNumber;
     } catch (e) {
-      console.error("Transaction failed: ", e);
+      console.error("Error generating number: ", e);
       throw e;
     }
   };
