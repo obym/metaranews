@@ -15,6 +15,8 @@ interface Letter {
   clientAddress: string;
   items: any[];
   subTotal: number;
+  content?: string;
+  subject?: string;
 }
 
 export default function LetterView() {
@@ -244,7 +246,7 @@ export default function LetterView() {
                     </tr>
                     <tr>
                       <td className="pr-4 py-1">Perihal</td>
-                      <td className="py-1">: Penawaran iklan di metaranews.co</td>
+                      <td className="py-1">: {letter.subject || 'Penawaran iklan di metaranews.co'}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -257,12 +259,18 @@ export default function LetterView() {
                 <p className="mt-4">di Tempat</p>
               </div>
 
-              <div className="text-sm space-y-4 text-justify mb-6">
-                <p>Dengan hormat,</p>
-                <p>Salam silaturrahim kami sampaikan, semoga Bapak/Ibu beserta seluruh staf senantiasa mendapat limpahan rahmat dari Tuhan Yang Maha Esa. Amin.</p>
-                <p><strong>Metaranews.co</strong> merupakan media online yang menyajikan berita-berita aktual secara cepat, akurat, terpercaya dan dikaji secara mendalam dan merupakan media efektif untuk menyebarkan informasi tanpa batas teritorial. Media ini bernaung di bawah <strong>PT Portal Digital Media Nusantara</strong>.</p>
-                <p>Metaranews.co yang menyajikan berita-berita khas dan khusus Jawa Timur hadir menjawab kebutuhan zaman, dengan semangat mengusung misi building, inspiring, dan positive thinking melalui portal berita <strong>metaranews.co</strong>. Dengan menggunakan <strong>metaranews.co</strong>, maka berita-berita lokal yang tersaji bisa dibaca dan dinikmati secara lokal, regional, nasional, maupun internasional.</p>
-                <p>Pada kesempatan ini, kami ingin mengajukan penawaran kerjasama dengan rincian sebagai berikut:</p>
+              <div className="text-sm space-y-4 text-justify mb-6 whitespace-pre-wrap">
+                {letter.content ? (
+                  <p>{letter.content}</p>
+                ) : (
+                  <>
+                    <p>Dengan hormat,</p>
+                    <p>Salam silaturrahim kami sampaikan, semoga Bapak/Ibu beserta seluruh staf senantiasa mendapat limpahan rahmat dari Tuhan Yang Maha Esa. Amin.</p>
+                    <p><strong>Metaranews.co</strong> merupakan media online yang menyajikan berita-berita aktual secara cepat, akurat, terpercaya dan dikaji secara mendalam dan merupakan media efektif untuk menyebarkan informasi tanpa batas teritorial. Media ini bernaung di bawah <strong>PT Portal Digital Media Nusantara</strong>.</p>
+                    <p>Metaranews.co yang menyajikan berita-berita khas dan khusus Jawa Timur hadir menjawab kebutuhan zaman, dengan semangat mengusung misi building, inspiring, dan positive thinking melalui portal berita <strong>metaranews.co</strong>. Dengan menggunakan <strong>metaranews.co</strong>, maka berita-berita lokal yang tersaji bisa dibaca dan dinikmati secara lokal, regional, nasional, maupun internasional.</p>
+                    <p>Pada kesempatan ini, kami ingin mengajukan penawaran kerjasama dengan rincian sebagai berikut:</p>
+                  </>
+                )}
               </div>
 
               <table className="w-full mb-6 border-collapse border border-black text-sm">
@@ -295,7 +303,6 @@ export default function LetterView() {
                   <p>PT Portal Digital Media Nusantara</p>
                   <div className="h-24 relative flex justify-center items-center">
                     {/* Placeholder for Signature/Stamp */}
-                    <div className="absolute opacity-20 text-red-600 text-6xl">M</div>
                   </div>
                   <p className="font-bold underline">Moh. Muhson Agil S.</p>
                   <p>Direktur</p>

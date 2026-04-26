@@ -36,6 +36,9 @@ export default function LetterForm() {
   const [selectedClientId, setSelectedClientId] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [manualNumber, setManualNumber] = useState('');
+  const [subject, setSubject] = useState('Penawaran iklan di metaranews.co');
+  const [content, setContent] = useState(`Dengan hormat,\n\nSalam silaturrahim kami sampaikan, semoga Bapak/Ibu beserta seluruh staf senantiasa mendapat limpahan rahmat dari Tuhan Yang Maha Esa. Amin.\n\nMetaranews.co merupakan media online yang menyajikan berita-berita aktual secara cepat, akurat, terpercaya dan dikaji secara mendalam dan merupakan media efektif untuk menyebarkan informasi tanpa batas teritorial. Media ini bernaung di bawah PT Portal Digital Media Nusantara.\n\nMetaranews.co yang menyajikan berita-berita khas dan khusus Jawa Timur hadir menjawab kebutuhan zaman, dengan semangat mengusung misi building, inspiring, dan positive thinking melalui portal berita metaranews.co. Dengan menggunakan metaranews.co, maka berita-berita lokal yang tersaji bisa dibaca dan dinikmati secara lokal, regional, nasional, maupun internasional.\n\nPada kesempatan ini, kami ingin mengajukan penawaran kerjasama dengan rincian sebagai berikut:`);
+  
   const [items, setItems] = useState<Item[]>([{ description: '', qty: 1, period: '', price: 0, total: 0 }]);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(isEditMode);
@@ -69,6 +72,8 @@ export default function LetterForm() {
           setDate(data.date.split('T')[0]);
           setManualNumber(data.number);
           setItems(data.items || []);
+          if (data.subject) setSubject(data.subject);
+          if (data.content) setContent(data.content);
         } else {
           alert("Dokumen tidak ditemukan atau Anda tidak memiliki akses.");
           navigate('/letters');
@@ -199,7 +204,7 @@ export default function LetterForm() {
         }
       }
       
-      const letterData = {
+      const letterData: any = {
         type,
         number: generatedNumber,
         date: letterDate.toISOString(),
@@ -211,6 +216,11 @@ export default function LetterForm() {
         status: 'draft',
         ownerId: user.uid,
       };
+
+      if (type === 'penawaran') {
+        letterData.subject = subject;
+        letterData.content = content;
+      }
       
       if (isEditMode && id) {
         const docRef = doc(db, 'letters', id);
@@ -299,6 +309,33 @@ export default function LetterForm() {
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
               />
             </div>
+            
+            {type === 'penawaran' && (
+              <div className="sm:col-span-2 space-y-6">
+                 <div>
+                    <label htmlFor="subject" className="block text-sm font-medium text-gray-700">Perihal / Subjek</label>
+                    <input
+                      type="text"
+                      name="subject"
+                      id="subject"
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                    />
+                 </div>
+                 <div>
+                    <label htmlFor="content" className="block text-sm font-medium text-gray-700">Isi Dokumen (Manual Edit)</label>
+                    <textarea
+                      id="content"
+                      name="content"
+                      rows={12}
+                      value={content}
+                      onChange={(e) => setContent(e.target.value)}
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm font-sans"
+                    />
+                 </div>
+              </div>
+            )}
           </div>
 
           <div>
