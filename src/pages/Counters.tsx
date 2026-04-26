@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, onSnapshot, where } from 'firebase/firestore';
+import { collection, query, onSnapshot, where, getDocs, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { FileText } from 'lucide-react';
@@ -24,7 +24,7 @@ export default function Counters() {
       ? query(collection(db, 'letters'))
       : query(collection(db, 'letters'), where('ownerId', '==', user.uid));
       
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
       const lettersData: Letter[] = [];
       snapshot.forEach((doc) => {
         lettersData.push({ id: doc.id, ...doc.data() } as Letter);
@@ -32,12 +32,64 @@ export default function Counters() {
       // Sort by date descending
       lettersData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       setLetters(lettersData);
+      
+      // Admin syncs the global counter based on existing letters
+      if (role === 'admin' && lettersData.length > 0) {
+        try {
+          const currentYear = new Date().getFullYear();
+          let maxPenawaran = 0;
+          let maxInvoice = 0;
+          
+          lettersData.forEach(l => {
+             const lYear = new Date(l.date).getFullYear();
+             if (lYear === currentYear) {
+               const num = parseInt(l.number, 10);
+               if (!isNaN(num)) {
+                 if (l.type === 'penawaran' && num > maxPenawaran) {
+                   maxPenawaran = num;
+                 } else if (l.type === 'invoice' && num > maxInvoice) {
+                   maxInvoice = num;
+                 }
+               }
+             }
+          });
+          
+          if (maxPenawaran > 0 || maxInvoice > 0) {
+            const counterRef = doc(db, 'counters', 'global');
+            const counterSnap = await getDoc(counterRef);
+            
+            const dataToSet = {
+              year: currentYear,
+              month: new Date().getMonth() + 1,
+              penawaranCount: maxPenawaran,
+              invoiceCount: maxInvoice
+            };
+            
+            if (!counterSnap.exists()) {
+              await setDoc(counterRef, dataToSet);
+            } else {
+              const currentData = counterSnap.data();
+              if (currentData.year !== currentYear || 
+                  (currentData.penawaranCount || 0) < maxPenawaran || 
+                  (currentData.invoiceCount || 0) < maxInvoice) {
+                await updateDoc(counterRef, {
+                  year: currentYear,
+                  penawaranCount: Math.max(currentData.year === currentYear ? (currentData.penawaranCount || 0) : 0, maxPenawaran),
+                  invoiceCount: Math.max(currentData.year === currentYear ? (currentData.invoiceCount || 0) : 0, maxInvoice)
+                });
+              }
+            }
+          }
+        } catch (err) {
+          console.error("Failed to sync global counters", err);
+        }
+      }
     }, (error) => {
       console.error("Error fetching letters:", error);
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, [user, role]);
 
   return (
     <div className="max-w-6xl mx-auto">

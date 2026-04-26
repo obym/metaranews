@@ -236,6 +236,45 @@ export default function LetterForm() {
         letterData.content = content;
       }
       
+      // Ensure the global counter is bumped if a manual number is used
+      try {
+        const numPart = parseInt(generatedNumber, 10);
+        if (!isNaN(numPart) && numPart > 0) {
+          const counterRef = doc(db, 'counters', 'global');
+          const counterDoc = await getDoc(counterRef);
+          const currentYear = letterDate.getFullYear();
+          let shouldUpdate = false;
+          let updateD: any = { year: currentYear };
+          
+          if (!counterDoc.exists()) {
+            shouldUpdate = true;
+            updateD.penawaranCount = type === 'penawaran' ? numPart : 0;
+            updateD.invoiceCount = type === 'invoice' ? numPart : 0;
+          } else {
+            const data = counterDoc.data();
+            if (data.year !== currentYear) {
+              shouldUpdate = true;
+              updateD.penawaranCount = type === 'penawaran' ? numPart : 0;
+              updateD.invoiceCount = type === 'invoice' ? numPart : 0;
+            } else {
+              if (type === 'penawaran' && numPart > (data.penawaranCount || 0)) {
+                shouldUpdate = true;
+                updateD.penawaranCount = numPart;
+              } else if (type === 'invoice' && numPart > (data.invoiceCount || 0)) {
+                shouldUpdate = true;
+                updateD.invoiceCount = numPart;
+              }
+            }
+          }
+          
+          if (shouldUpdate) {
+            await setDoc(counterRef, updateD, { merge: true });
+          }
+        }
+      } catch (err) {
+        console.error("Silent err updating counter from manual number", err);
+      }
+      
       if (isEditMode && id) {
         const docRef = doc(db, 'letters', id);
         await updateDoc(docRef, {
