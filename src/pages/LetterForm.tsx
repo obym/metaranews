@@ -331,7 +331,8 @@ export default function LetterForm() {
                       rows={12}
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm font-sans"
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                      style={{ fontFamily: 'Calibri, Arial, sans-serif' }}
                     />
                  </div>
               </div>

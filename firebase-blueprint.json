@@ -57,6 +57,19 @@
         "year": { "type": "number" }
       },
       "required": ["penawaranCount", "invoiceCount", "month", "year"]
+    },
+    "User": {
+      "title": "User",
+      "description": "User profile and role",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "user"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "lastLoginAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "role"]
     }
   },
   "firestore": {
@@ -71,6 +84,10 @@
     "/counters/{counterId}": {
       "schema": { "$ref": "#/entities/Counter" },
       "description": "Stores counters for auto-incrementing letter numbers"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores user roles"
     }
   }
 }
