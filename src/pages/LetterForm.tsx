@@ -22,7 +22,7 @@ interface Item {
 const ROMAN_NUMERALS = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
 
 export default function LetterForm() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { id } = useParams();
@@ -46,7 +46,9 @@ export default function LetterForm() {
   useEffect(() => {
     if (!user) return;
     const fetchClients = async () => {
-      const q = query(collection(db, 'clients'), where('ownerId', '==', user.uid));
+      const q = role === 'admin' 
+        ? query(collection(db, 'clients'))
+        : query(collection(db, 'clients'), where('ownerId', '==', user.uid));
       const snapshot = await getDocs(q);
       const clientsData: Client[] = [];
       snapshot.forEach((doc) => {
@@ -55,7 +57,7 @@ export default function LetterForm() {
       setClients(clientsData);
     };
     fetchClients();
-  }, [user]);
+  }, [user, role]);
 
   useEffect(() => {
     if (!user || !isEditMode || !id) return;
@@ -65,7 +67,7 @@ export default function LetterForm() {
         const docRef = doc(db, 'letters', id);
         const docSnap = await getDoc(docRef);
         
-        if (docSnap.exists() && docSnap.data().ownerId === user.uid) {
+        if (docSnap.exists() && (role === 'admin' || docSnap.data().ownerId === user.uid)) {
           const data = docSnap.data();
           setType(data.type);
           setSelectedClientId(data.clientId);
@@ -122,7 +124,7 @@ export default function LetterForm() {
     
     try {
       await runTransaction(db, async (transaction) => {
-        const counterRef = doc(db, 'counters', user.uid);
+        const counterRef = doc(db, 'counters', 'global');
         const counterDoc = await transaction.get(counterRef);
         
         let currentCount = 0;

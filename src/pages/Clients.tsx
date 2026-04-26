@@ -14,7 +14,7 @@ interface Client {
 }
 
 export default function Clients() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const [clients, setClients] = useState<Client[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
@@ -29,7 +29,10 @@ export default function Clients() {
   useEffect(() => {
     if (!user) return;
 
-    const q = query(collection(db, 'clients'), where('ownerId', '==', user.uid));
+    const q = role === 'admin'
+      ? query(collection(db, 'clients'))
+      : query(collection(db, 'clients'), where('ownerId', '==', user.uid));
+      
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const clientsData: Client[] = [];
       snapshot.forEach((doc) => {

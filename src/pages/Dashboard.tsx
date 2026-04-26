@@ -6,7 +6,7 @@ import { Users, FileText, FileCheck, MapPin } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const [stats, setStats] = useState({
     clients: 0,
     penawaran: 0,
@@ -20,10 +20,14 @@ export default function Dashboard() {
 
     const fetchStats = async () => {
       try {
-        const clientsQuery = query(collection(db, 'clients'), where('ownerId', '==', user.uid));
+        const clientsQuery = role === 'admin' 
+          ? query(collection(db, 'clients'))
+          : query(collection(db, 'clients'), where('ownerId', '==', user.uid));
         const clientsSnapshot = await getDocs(clientsQuery);
         
-        const lettersQuery = query(collection(db, 'letters'), where('ownerId', '==', user.uid));
+        const lettersQuery = role === 'admin'
+          ? query(collection(db, 'letters'))
+          : query(collection(db, 'letters'), where('ownerId', '==', user.uid));
         const lettersSnapshot = await getDocs(lettersQuery);
         
         let penawaranCount = 0;

@@ -54,35 +54,34 @@ service cloud.firestore {
     // ===============================================================
 
     match /clients/{clientId} {
-      allow read: if isAuthenticated() && (resource == null || resource.data.ownerId == request.auth.uid);
+      allow read: if isAuthenticated() && (resource == null || isAdmin() || resource.data.ownerId == request.auth.uid);
       allow create: if isAuthenticated() && 
                     hasRequiredFields(['name', 'ownerId', 'createdAt']) && 
                     isValidClient(request.resource.data) && 
                     uidUnchanged();
       allow update: if isAuthenticated() && 
-                    isDocOwner() && 
+                    (isDocOwner() || isAdmin()) && 
                     isValidClient(request.resource.data) && 
                     uidNotModified();
-      allow delete: if isAuthenticated() && isDocOwner();
+      allow delete: if isAuthenticated() && (isDocOwner() || isAdmin());
     }
 
     match /letters/{letterId} {
-      allow read: if isAuthenticated() && (resource == null || resource.data.ownerId == request.auth.uid);
+      allow read: if isAuthenticated() && (resource == null || isAdmin() || resource.data.ownerId == request.auth.uid);
       allow create: if isAuthenticated() && 
                     hasRequiredFields(['type', 'number', 'date', 'clientId', 'ownerId', 'createdAt']) && 
                     isValidLetter(request.resource.data) && 
                     uidUnchanged();
       allow update: if isAuthenticated() && 
-                    isDocOwner() && 
+                    (isDocOwner() || isAdmin()) && 
                     isValidLetter(request.resource.data) && 
                     uidNotModified();
-      allow delete: if isAuthenticated() && isDocOwner();
+      allow delete: if isAuthenticated() && (isDocOwner() || isAdmin());
     }
 
     match /counters/{counterId} {
       // Allow read/write to counters for authenticated users (scoped by user ID in the app)
-      allow read: if isAuthenticated() && counterId == request.auth.uid;
-      allow write: if isAuthenticated() && counterId == request.auth.uid;
+      allow read, write: if isAuthenticated();
     }
     
     match /users/{userId} {

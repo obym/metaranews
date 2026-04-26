@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, collection, getDocs } from 'firebase/firestore';
 import { auth, db, loginWithGoogle, logout } from '../firebase';
 
 interface AuthContextType {
@@ -32,14 +32,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const userSnap = await getDoc(userRef);
           
           if (!userSnap.exists()) {
+            // Check if there are ANY users yet
+            const snapshot = await getDocs(collection(db, 'users'));
+            const isFirstUser = snapshot.empty;
+            
+            const initialRole = isFirstUser ? 'admin' : 'user';
+
             await setDoc(userRef, {
               email: user.email,
               name: user.displayName,
-              role: 'admin', // First user is usually admin, or just default to admin for simplicity
+              role: initialRole,
               createdAt: new Date().toISOString(),
               lastLoginAt: new Date().toISOString()
             });
-            setRole('admin');
+            setRole(initialRole);
           } else {
             await updateDoc(userRef, {
               lastLoginAt: new Date().toISOString(),

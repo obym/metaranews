@@ -14,13 +14,16 @@ interface Letter {
 }
 
 export default function Counters() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const [letters, setLetters] = useState<Letter[]>([]);
 
   useEffect(() => {
     if (!user) return;
 
-    const q = query(collection(db, 'letters'), where('ownerId', '==', user.uid));
+    const q = role === 'admin'
+      ? query(collection(db, 'letters'))
+      : query(collection(db, 'letters'), where('ownerId', '==', user.uid));
+      
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const lettersData: Letter[] = [];
       snapshot.forEach((doc) => {
