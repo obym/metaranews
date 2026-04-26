@@ -123,18 +123,40 @@ export default function LetterForm() {
     let newNumber = '';
     
     try {
+      // Find the highest count from all counters (including legacy user-specific counters)
+      let maxLegacyCount = 0;
+      let maxLegacyInvoiceCount = 0;
+      try {
+        const countersSnap = await getDocs(collection(db, 'counters'));
+        countersSnap.forEach((doc) => {
+          const data = doc.data();
+          if (data.year === year) {
+            if (data.penawaranCount > maxLegacyCount) {
+              maxLegacyCount = data.penawaranCount;
+            }
+            if (data.invoiceCount > maxLegacyInvoiceCount) {
+              maxLegacyInvoiceCount = data.invoiceCount;
+            }
+          }
+        });
+      } catch (err) {
+        console.error("Error reading legacy counters:", err);
+      }
+
       await runTransaction(db, async (transaction) => {
         const counterRef = doc(db, 'counters', 'global');
         const counterDoc = await transaction.get(counterRef);
         
-        let currentCount = 0;
-        let docMonth = month;
-        let docYear = year;
+        let currentCount = type === 'penawaran' ? maxLegacyCount : maxLegacyInvoiceCount;
+        let globalPenawaranCount = maxLegacyCount;
+        let globalInvoiceCount = maxLegacyInvoiceCount;
         
         if (counterDoc.exists()) {
           const data = counterDoc.data();
           if (data.year === year) {
-             currentCount = type === 'penawaran' ? (data.penawaranCount || 0) : (data.invoiceCount || 0);
+             globalPenawaranCount = Math.max(maxLegacyCount, data.penawaranCount || 0);
+             globalInvoiceCount = Math.max(maxLegacyInvoiceCount, data.invoiceCount || 0);
+             currentCount = type === 'penawaran' ? globalPenawaranCount : globalInvoiceCount;
           }
         }
         
@@ -153,20 +175,10 @@ export default function LetterForm() {
         
         if (type === 'penawaran') {
           updateData.penawaranCount = nextCount;
-          // Preserve invoice count if exists
-          if (counterDoc.exists() && counterDoc.data().year === year && counterDoc.data().invoiceCount) {
-             updateData.invoiceCount = counterDoc.data().invoiceCount;
-          } else if (!counterDoc.exists() || counterDoc.data().year !== year) {
-             updateData.invoiceCount = 0;
-          }
+          updateData.invoiceCount = globalInvoiceCount;
         } else {
           updateData.invoiceCount = nextCount;
-          // Preserve penawaran count if exists
-          if (counterDoc.exists() && counterDoc.data().year === year && counterDoc.data().penawaranCount) {
-             updateData.penawaranCount = counterDoc.data().penawaranCount;
-          } else if (!counterDoc.exists() || counterDoc.data().year !== year) {
-             updateData.penawaranCount = 0;
-          }
+          updateData.penawaranCount = globalPenawaranCount;
         }
         
         transaction.set(counterRef, updateData, { merge: true });
