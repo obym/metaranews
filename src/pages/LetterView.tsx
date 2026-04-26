@@ -122,7 +122,7 @@ export default function LetterView() {
         <div 
           ref={componentRef} 
           className="print-container bg-white p-8 mx-auto relative print:p-0 print:block" 
-          style={{ width: '210mm', minHeight: '330mm', color: '#000', fontFamily: 'Arial, sans-serif' }}
+          style={{ width: '210mm', minHeight: '330mm', color: '#000', fontFamily: 'Calibri, Arial, sans-serif' }}
         >
           {/* Watermark */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] z-0">
