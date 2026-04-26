@@ -32,8 +32,20 @@ export default function Letters() {
       snapshot.forEach((doc) => {
         lettersData.push({ id: doc.id, ...doc.data() } as Letter);
       });
-      // Sort by date descending
-      lettersData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      // Sort by number descending, then by date descending
+      lettersData.sort((a, b) => {
+        // Extract the numerical part of the letter number for accurate sorting
+        // Example format: 127/METARA/IV/2026
+        const numA = parseInt(a.number.split('/')[0]) || 0;
+        const numB = parseInt(b.number.split('/')[0]) || 0;
+        
+        if (numB !== numA) {
+          return numB - numA;
+        }
+        
+        // Fallback to date if numbers are the same (or extraction fails)
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      });
       setLetters(lettersData);
     }, (error) => {
       console.error("Error fetching letters:", error);
