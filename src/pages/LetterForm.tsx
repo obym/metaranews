@@ -130,7 +130,7 @@ export default function LetterForm() {
         const data = doc.data();
         if (!data.date) return;
         const lDate = new Date(data.date);
-        if (lDate.getFullYear() === year && data.type === type) {
+        if (lDate.getFullYear() === year) {
           const numStr = data.number || '';
           const slashIndex = numStr.indexOf('/');
           const prefix = slashIndex > -1 ? numStr.substring(0, slashIndex) : numStr;
@@ -153,7 +153,7 @@ export default function LetterForm() {
       await setDoc(counterRef, {
         year: year,
         month: month,
-        [type === 'penawaran' ? 'penawaranCount' : 'invoiceCount']: nextCount
+        globalCount: nextCount
       }, { merge: true });
       
       return newNumber;
@@ -220,21 +220,16 @@ export default function LetterForm() {
           
           if (!counterDoc.exists()) {
             shouldUpdate = true;
-            updateD.penawaranCount = type === 'penawaran' ? numPart : 0;
-            updateD.invoiceCount = type === 'invoice' ? numPart : 0;
+            updateD.globalCount = numPart;
           } else {
             const data = counterDoc.data();
             if (data.year !== currentYear) {
               shouldUpdate = true;
-              updateD.penawaranCount = type === 'penawaran' ? numPart : 0;
-              updateD.invoiceCount = type === 'invoice' ? numPart : 0;
+              updateD.globalCount = numPart;
             } else {
-              if (type === 'penawaran' && numPart > (data.penawaranCount || 0)) {
+              if (numPart > (data.globalCount || 0)) {
                 shouldUpdate = true;
-                updateD.penawaranCount = numPart;
-              } else if (type === 'invoice' && numPart > (data.invoiceCount || 0)) {
-                shouldUpdate = true;
-                updateD.invoiceCount = numPart;
+                updateD.globalCount = numPart;
               }
             }
           }

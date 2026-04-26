@@ -35,32 +35,29 @@ export default function Counters() {
       if (role === 'admin' && lettersData.length > 0) {
         try {
           const currentYear = new Date().getFullYear();
-          let maxPenawaran = 0;
-          let maxInvoice = 0;
+          let maxCount = 0;
           
           lettersData.forEach(l => {
              const lYear = new Date(l.date).getFullYear();
              if (lYear === currentYear) {
-               const num = parseInt(l.number, 10);
-               if (!isNaN(num)) {
-                 if (l.type === 'penawaran' && num > maxPenawaran) {
-                   maxPenawaran = num;
-                 } else if (l.type === 'invoice' && num > maxInvoice) {
-                   maxInvoice = num;
-                 }
+               const numStr = l.number || '';
+               const slashIndex = numStr.indexOf('/');
+               const prefix = slashIndex > -1 ? numStr.substring(0, slashIndex) : numStr;
+               const num = parseInt(prefix, 10);
+               if (!isNaN(num) && num > maxCount) {
+                 maxCount = num;
                }
              }
           });
           
-          if (maxPenawaran > 0 || maxInvoice > 0) {
+          if (maxCount > 0) {
             const counterRef = doc(db, 'counters', 'global');
             const counterSnap = await getDoc(counterRef);
             
             const dataToSet = {
               year: currentYear,
               month: new Date().getMonth() + 1,
-              penawaranCount: maxPenawaran,
-              invoiceCount: maxInvoice
+              globalCount: maxCount
             };
             
             if (!counterSnap.exists()) {
@@ -68,12 +65,10 @@ export default function Counters() {
             } else {
               const currentData = counterSnap.data();
               if (currentData.year !== currentYear || 
-                  (currentData.penawaranCount || 0) < maxPenawaran || 
-                  (currentData.invoiceCount || 0) < maxInvoice) {
+                  (currentData.globalCount || 0) < maxCount) {
                 await updateDoc(counterRef, {
                   year: currentYear,
-                  penawaranCount: Math.max(currentData.year === currentYear ? (currentData.penawaranCount || 0) : 0, maxPenawaran),
-                  invoiceCount: Math.max(currentData.year === currentYear ? (currentData.invoiceCount || 0) : 0, maxInvoice)
+                  globalCount: Math.max(currentData.year === currentYear ? (currentData.globalCount || 0) : 0, maxCount)
                 });
               }
             }
