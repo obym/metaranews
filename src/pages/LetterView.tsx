@@ -57,7 +57,12 @@ export default function LetterView() {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(amount);
+    return new Intl.NumberFormat('id-ID', { 
+      style: 'currency', 
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
   };
 
   if (loading) {
@@ -213,7 +218,7 @@ export default function LetterView() {
                     <span>: {formatCurrency(letter.subTotal)}</span>
                   </div>
                   <div className="bg-[#b31b1b] text-white text-center py-3 text-2xl font-bold rounded-l-full rounded-r-sm">
-                    {formatCurrency(letter.subTotal).replace(',00', '')}
+                    {formatCurrency(letter.subTotal)}
                   </div>
                 </div>
               </div>
