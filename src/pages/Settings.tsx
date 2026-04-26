@@ -62,82 +62,77 @@ export default function Settings() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-900">Pengaturan</h1>
-      <div className="mt-6 bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
-        <div className="md:grid md:grid-cols-3 md:gap-6">
-          <div className="md:col-span-1">
-            <h3 className="text-lg font-medium leading-6 text-gray-900">Kelola Pengguna</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Pengaturan siapa saja yang bisa menjadi 'admin' dan siapa yang jadi 'user'.
-            </p>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Kelola Akses Pengguna</h1>
+        <p className="mt-1 text-sm text-gray-500">
+          Atur role untuk setiap email. Role menentukan akses mereka di aplikasi.
+        </p>
+      </div>
+
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        {loading ? (
+          <div className="p-8 text-center text-gray-500">Memuat pengguna...</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-[#FAFAFA]">
+                <tr>
+                  <th scope="col" className="px-6 py-4 text-left text-sm font-semibold text-gray-900 border-b border-gray-200">
+                    Nama
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left text-sm font-semibold text-gray-900 border-b border-gray-200">
+                    Email
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left text-sm font-semibold text-gray-900 border-b border-gray-200">
+                    Role
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left text-sm font-semibold text-gray-900 border-b border-gray-200">
+                    Aksi
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 bg-white">
+                {users.map((u) => (
+                  <tr key={u.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                      {u.name || (u.id === user?.uid ? user?.displayName : 'Unknown')}
+                      {u.id === user?.uid && (
+                        <span className="ml-2 text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                          (Anda)
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {u.email}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium ${
+                        u.role === 'admin' ? 'bg-indigo-50 text-indigo-700' : 'bg-gray-100 text-gray-700'
+                      }`}>
+                        {u.role === 'admin' ? 'Admin' : 'User'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      {role === 'admin' ? (
+                        <select
+                          value={u.role}
+                          onChange={(e) => handleRoleChange(u.id, e.target.value as 'admin' | 'user')}
+                          disabled={u.id === user?.uid}
+                          className="block w-full pl-3 pr-8 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-500"
+                        >
+                          <option value="admin">Admin</option>
+                          <option value="user">User</option>
+                        </select>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-          <div className="mt-5 md:mt-0 md:col-span-2">
-            {loading ? (
-              <p>Memuat pengguna...</p>
-            ) : (
-              <div className="flex flex-col">
-                <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                  <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                    <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Pengguna
-                            </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Role
-                            </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Aksi
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {users.map((u) => (
-                            <tr key={u.id}>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center">
-                                  <div>
-                                    <div className="text-sm font-medium text-gray-900">{u.name || (u.id === user?.uid ? user?.displayName : 'Unknown')}</div>
-                                    <div className="text-sm text-gray-500">{u.email}</div>
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${u.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'}`}>
-                                  {u.role === 'admin' ? (
-                                    <span className="flex items-center gap-1"><Shield className="w-3 h-3" /> Admin</span>
-                                  ) : (
-                                    <span className="flex items-center gap-1"><UserIcon className="w-3 h-3" /> User</span>
-                                  )}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {role === 'admin' ? (
-                                  <select
-                                    value={u.role}
-                                    onChange={(e) => handleRoleChange(u.id, e.target.value as 'admin' | 'user')}
-                                    className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm rounded-md"
-                                  >
-                                    <option value="admin">Admin</option>
-                                    <option value="user">User</option>
-                                  </select>
-                                ) : (
-                                  <span className="text-gray-400">Tidak ada akses</span>
-                                )}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
