@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
-import { Users, FileText, Heart, CircleDollarSign } from 'lucide-react';
+import { Users, FileText, CircleDollarSign, Wallet } from 'lucide-react';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 export default function Dashboard() {
@@ -171,14 +171,14 @@ export default function Dashboard() {
 
         <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-400">
-              <Heart size={20} strokeWidth={2.5} />
+            <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-500">
+              <Wallet size={20} strokeWidth={2.5} />
             </div>
-            <span className="text-[13px] font-semibold text-gray-500">Loyalty</span>
+            <span className="text-[13px] font-semibold text-gray-500">Fee Insentif / Cashback</span>
           </div>
           <div className="flex items-end justify-between">
-            <span className="text-[28px] font-bold text-gray-900 tracking-tight leading-none">{stats.loyalty}%</span>
-            <span className="text-[11px] font-extrabold text-red-500 bg-red-50 px-2 py-0.5 rounded flex items-center gap-1">-1% &darr;</span>
+            <span className="text-[28px] font-bold text-gray-900 tracking-tight leading-none">Rp 0</span>
+            <span className="text-[11px] font-extrabold text-gray-500 bg-gray-50 px-2 py-0.5 rounded flex items-center gap-1">0%</span>
           </div>
         </div>
       </div>

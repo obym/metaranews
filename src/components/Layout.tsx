@@ -55,27 +55,7 @@ export default function Layout() {
               })}
             </nav>
           </div>
-          <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
-            <div className="flex items-center w-full">
-              <div>
-                <img
-                  className="inline-block h-9 w-9 rounded-full"
-                  src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}`}
-                  alt=""
-                  referrerPolicy="no-referrer"
-                />
-              </div>
-              <div className="ml-3 flex-1">
-                <p className="text-sm font-medium text-gray-700 truncate">{user.displayName}</p>
-                <button
-                  onClick={logout}
-                  className="text-xs font-medium text-gray-500 hover:text-gray-700 flex items-center mt-1"
-                >
-                  <LogOut className="h-3 w-3 mr-1" /> Logout
-                </button>
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
 
@@ -135,6 +115,29 @@ export default function Layout() {
 
       {/* Main content */}
       <div className="flex flex-col w-0 flex-1 overflow-hidden md:pl-64 print:pl-0 print:block print:overflow-visible print:w-full">
+        {/* Top Header */}
+        <div className="hidden md:flex justify-end items-center h-16 px-8 bg-white border-b border-gray-100 print:hidden shrink-0 shadow-sm z-10 w-full relative">
+          <div className="flex items-center gap-3">
+            <div className="text-right">
+              <p className="text-[13px] font-bold text-gray-800">{user.displayName}</p>
+              <button
+                onClick={logout}
+                className="text-[11px] font-bold text-gray-500 hover:text-red-500 transition-colors flex items-center justify-end w-full tracking-wider uppercase mt-0.5"
+              >
+                Logout
+              </button>
+            </div>
+            <div className="h-10 w-10 min-w-[40px] rounded-full overflow-hidden border-2 border-white shadow-sm">
+              <img
+                className="h-full w-full object-cover"
+                src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}`}
+                alt=""
+                referrerPolicy="no-referrer"
+              />
+            </div>
+          </div>
+        </div>
+
         <main className="flex-1 relative overflow-y-auto focus:outline-none print:overflow-visible print:static">
           <div className="py-6 print:py-0">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 print:px-0 print:max-w-none print:mx-0">
