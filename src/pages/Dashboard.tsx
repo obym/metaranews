@@ -17,6 +17,7 @@ export default function Dashboard() {
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
   const [recentInvoices, setRecentInvoices] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
+  const [topClients, setTopClients] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -79,6 +80,21 @@ export default function Dashboard() {
         
         const invoicesOnly = allLetters.filter(l => l.type === 'invoice');
         setRecentInvoices(invoicesOnly.slice(0, 5));
+        
+        const clientInvoiceCounts = new Map<string, {name: string, count: number}>();
+        invoicesOnly.forEach(inv => {
+          const name = inv.clientName || 'Unknown';
+          if (!clientInvoiceCounts.has(name)) {
+            clientInvoiceCounts.set(name, { name, count: 0 });
+          }
+          clientInvoiceCounts.get(name)!.count++;
+        });
+        
+        const top5 = Array.from(clientInvoiceCounts.values())
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 5);
+        
+        setTopClients(top5);
         
         setActivities(allLetters.slice(0, 5));
         
@@ -216,22 +232,33 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-[#1e3a8a] rounded-[24px] p-8 shadow-sm text-white lg:col-span-1 flex flex-col justify-between relative overflow-hidden group">
-          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-56 h-56 rounded-full bg-blue-500/40 blur-[40px] pointer-events-none transition-transform duration-700 group-hover:scale-110"></div>
-          <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-40 h-40 rounded-full bg-[#38bdf8]/20 blur-[30px] pointer-events-none transition-transform duration-700 group-hover:scale-110"></div>
-          
-          <div className="relative z-10">
-            <span className="inline-block bg-white text-[#1e3a8a] text-[10px] font-black px-3 py-1 rounded-full mb-6 tracking-widest">
-              NEW
-            </span>
-            <h3 className="text-[26px] font-bold mb-4 leading-tight tracking-tight">We have added new invoicing templates!</h3>
-            <p className="text-blue-100 text-[13px] mb-8 leading-relaxed font-medium">
-              New templates focused on helping you improve your business
-            </p>
+        <div className="bg-white rounded-[24px] p-8 shadow-sm border border-gray-100 lg:col-span-1 flex flex-col overflow-hidden hover:shadow-md transition-shadow">
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-gray-900">Top 5 Clients</h3>
+            <p className="text-[13px] text-gray-500 font-medium">Berdasarkan jumlah invoice</p>
           </div>
-          <button className="relative z-10 bg-white text-[#1e3a8a] font-bold text-sm py-3.5 px-4 rounded-[14px] w-full hover:bg-gray-50 transition-colors shadow-sm">
-            Download Now
-          </button>
+          <div className="flex-1 overflow-y-auto pr-2">
+            <div className="space-y-4">
+              {topClients.length > 0 ? topClients.map((client, idx) => (
+                <div key={idx} className="flex items-center justify-between p-3 rounded-2xl bg-gray-50/80 hover:bg-gray-50 transition-colors border border-gray-100/50">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex-shrink-0 flex items-center justify-center font-bold text-sm border border-blue-100/50">
+                       {idx + 1}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[14px] font-bold text-gray-900 truncate" title={client.name}>{client.name}</p>
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0 text-right ml-2">
+                    <p className="text-[14px] font-black text-[#2563eb]">{client.count}</p>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Invoices</p>
+                  </div>
+                </div>
+              )) : (
+                <p className="text-[13px] text-gray-500 font-medium text-center py-8">Belum ada data klien.</p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
