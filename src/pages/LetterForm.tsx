@@ -3,7 +3,7 @@ import { collection, query, getDocs, addDoc, doc, getDoc, updateDoc, setDoc, ser
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
-import { Plus, Trash2, ArrowLeft } from 'lucide-react';
+import { Plus, Trash2, ArrowLeft, Bold, Italic, Underline } from 'lucide-react';
 
 interface Client {
   id: string;
@@ -109,6 +109,27 @@ export default function LetterForm() {
   const removeItem = (index: number) => {
     const newItems = items.filter((_, i) => i !== index);
     setItems(newItems);
+  };
+
+  const applyFormat = (index: number, tag: string) => {
+    const input = document.getElementById(`desc-${index}`) as HTMLInputElement;
+    if (!input) return;
+    
+    const start = input.selectionStart || 0;
+    const end = input.selectionEnd || 0;
+    const currentVal = items[index].description;
+    
+    const selectedText = currentVal.substring(start, end);
+    const beforeText = currentVal.substring(0, start);
+    const afterText = currentVal.substring(end);
+    
+    const newText = `${beforeText}<${tag}>${selectedText}</${tag}>${afterText}`;
+    handleItemChange(index, 'description', newText);
+    
+    setTimeout(() => {
+      input.focus();
+      input.setSelectionRange(start + tag.length + 2, start + tag.length + 2 + selectedText.length);
+    }, 0);
   };
 
   const subTotal = items.reduce((sum, item) => sum + item.total, 0);
@@ -376,13 +397,21 @@ export default function LetterForm() {
                 <div key={index} className="flex items-start space-x-4 p-4 border border-gray-200 rounded-md bg-gray-50">
                   <div className="flex-1 space-y-4">
                     <div>
-                      <label className="block text-xs font-medium text-gray-700">Deskripsi</label>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="block text-xs font-medium text-gray-700">Deskripsi</label>
+                        <div className="flex space-x-1">
+                          <button type="button" onClick={() => applyFormat(index, 'b')} className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded" title="Bold"><Bold size={14} /></button>
+                          <button type="button" onClick={() => applyFormat(index, 'i')} className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded" title="Italic"><Italic size={14} /></button>
+                          <button type="button" onClick={() => applyFormat(index, 'u')} className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded" title="Underline"><Underline size={14} /></button>
+                        </div>
+                      </div>
                       <input
                         type="text"
+                        id={`desc-${index}`}
                         required
                         value={item.description}
                         onChange={(e) => handleItemChange(index, 'description', e.target.value)}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                        className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
                         placeholder="Contoh: Advertorial Banner Web uk. 300x85"
                       />
                     </div>

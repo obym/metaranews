@@ -185,7 +185,7 @@ export default function LetterView() {
                 <tbody>
                   {letter.items.map((item, index) => (
                     <tr key={index} className="bg-[#e6e6e6]">
-                      <td className="py-4 px-4 print:py-1 print:px-2 text-sm print:text-[11px] border border-gray-800 print:leading-tight">{item.description}</td>
+                      <td className="py-4 px-4 print:py-1 print:px-2 text-sm print:text-[11px] border border-gray-800 print:leading-tight" dangerouslySetInnerHTML={{ __html: item.description }}></td>
                       <td className="py-4 px-4 print:py-1 print:px-2 text-center text-sm print:text-[11px] border border-gray-800 print:leading-tight">{item.qty}</td>
                       <td className="py-4 px-4 print:py-1 print:px-2 text-center text-sm print:text-[11px] border border-gray-800 print:leading-tight">{item.period}</td>
                       <td className="py-4 px-4 print:py-1 print:px-2 text-right text-sm print:text-[11px] border border-gray-800 print:leading-tight">{formatCurrency(item.price)}</td>
@@ -290,8 +290,8 @@ export default function LetterView() {
                 <tbody>
                   {letter.items.map((item, index) => (
                     <tr key={index}>
-                      <td className="border border-black py-2 px-3">{item.description.split(' ')[0] || 'Advertorial'}</td>
-                      <td className="border border-black py-2 px-3">{item.description}</td>
+                      <td className="border border-black py-2 px-3">{item.description.replace(/<[^>]*>?/gm, '').split(' ')[0] || 'Advertorial'}</td>
+                      <td className="border border-black py-2 px-3" dangerouslySetInnerHTML={{ __html: item.description }}></td>
                       <td className="border border-black py-2 px-3">{item.qty}x tayang/{item.period}</td>
                       <td className="border border-black py-2 px-3">{formatCurrency(item.price)}</td>
                     </tr>
