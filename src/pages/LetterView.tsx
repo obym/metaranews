@@ -172,34 +172,34 @@ export default function LetterView() {
                 </div>
               </div>
 
-              <table className="w-full mb-8 border-collapse border border-gray-800">
+              <table className="w-full mb-8 border-collapse border border-gray-800 print:mb-4">
                 <thead>
                   <tr className="bg-[#7a1c1c] text-white">
-                    <th className="py-3 px-4 text-left font-bold border border-gray-800">DESKRIPSI</th>
-                    <th className="py-3 px-4 text-center font-bold border border-gray-800">QTY</th>
-                    <th className="py-3 px-4 text-center font-bold border border-gray-800">PERIODE<br/>TAYANG</th>
-                    <th className="py-3 px-4 text-right font-bold border border-gray-800">HARGA</th>
-                    <th className="py-3 px-4 text-right font-bold border border-gray-800">TOTAL</th>
+                    <th className="py-3 px-4 print:py-1.5 print:px-2 text-left font-bold border border-gray-800 print:text-[11px]">DESKRIPSI</th>
+                    <th className="py-3 px-4 print:py-1.5 print:px-2 text-center font-bold border border-gray-800 print:text-[11px]">QTY</th>
+                    <th className="py-3 px-4 print:py-1.5 print:px-2 text-center font-bold border border-gray-800 print:text-[11px]">PERIODE<br/>TAYANG</th>
+                    <th className="py-3 px-4 print:py-1.5 print:px-2 text-right font-bold border border-gray-800 print:text-[11px]">HARGA</th>
+                    <th className="py-3 px-4 print:py-1.5 print:px-2 text-right font-bold border border-gray-800 print:text-[11px]">TOTAL</th>
                   </tr>
                 </thead>
                 <tbody>
                   {letter.items.map((item, index) => (
                     <tr key={index} className="bg-[#e6e6e6]">
-                      <td className="py-4 px-4 text-sm border border-gray-800">{item.description}</td>
-                      <td className="py-4 px-4 text-center text-sm border border-gray-800">{item.qty}</td>
-                      <td className="py-4 px-4 text-center text-sm border border-gray-800">{item.period}</td>
-                      <td className="py-4 px-4 text-right text-sm border border-gray-800">{formatCurrency(item.price)}</td>
-                      <td className="py-4 px-4 text-right text-sm border border-gray-800">{formatCurrency(item.total)}</td>
+                      <td className="py-4 px-4 print:py-1 print:px-2 text-sm print:text-[11px] border border-gray-800 print:leading-tight">{item.description}</td>
+                      <td className="py-4 px-4 print:py-1 print:px-2 text-center text-sm print:text-[11px] border border-gray-800 print:leading-tight">{item.qty}</td>
+                      <td className="py-4 px-4 print:py-1 print:px-2 text-center text-sm print:text-[11px] border border-gray-800 print:leading-tight">{item.period}</td>
+                      <td className="py-4 px-4 print:py-1 print:px-2 text-right text-sm print:text-[11px] border border-gray-800 print:leading-tight">{formatCurrency(item.price)}</td>
+                      <td className="py-4 px-4 print:py-1 print:px-2 text-right text-sm print:text-[11px] border border-gray-800 print:leading-tight">{formatCurrency(item.total)}</td>
                     </tr>
                   ))}
                   {/* Fill empty space if items are few */}
                   {Array.from({ length: Math.max(0, 3 - letter.items.length) }).map((_, i) => (
                     <tr key={`empty-${i}`} className="bg-[#e6e6e6]">
-                      <td className="py-4 px-4 border border-gray-800">&nbsp;</td>
-                      <td className="py-4 px-4 border border-gray-800">&nbsp;</td>
-                      <td className="py-4 px-4 border border-gray-800">&nbsp;</td>
-                      <td className="py-4 px-4 border border-gray-800">&nbsp;</td>
-                      <td className="py-4 px-4 border border-gray-800">&nbsp;</td>
+                      <td className="py-4 px-4 print:py-1 print:px-2 border border-gray-800">&nbsp;</td>
+                      <td className="py-4 px-4 print:py-1 print:px-2 border border-gray-800">&nbsp;</td>
+                      <td className="py-4 px-4 print:py-1 print:px-2 border border-gray-800">&nbsp;</td>
+                      <td className="py-4 px-4 print:py-1 print:px-2 border border-gray-800">&nbsp;</td>
+                      <td className="py-4 px-4 print:py-1 print:px-2 border border-gray-800">&nbsp;</td>
                     </tr>
                   ))}
                 </tbody>
