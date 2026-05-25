@@ -19,6 +19,37 @@ interface Item {
   total: number;
 }
 
+const ContentEditable = ({ value, onChange, id, placeholder }: { value: string, onChange: (val: string) => void, id: string, placeholder?: string }) => {
+  const contentEditableRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (contentEditableRef.current && contentEditableRef.current.innerHTML !== value) {
+      if (document.activeElement !== contentEditableRef.current) {
+        contentEditableRef.current.innerHTML = value;
+      }
+    }
+  }, [value]);
+
+  const handleInput = () => {
+    if (contentEditableRef.current) {
+      onChange(contentEditableRef.current.innerHTML);
+    }
+  };
+
+  return (
+    <div
+      ref={contentEditableRef}
+      id={id}
+      contentEditable
+      onInput={handleInput}
+      onBlur={handleInput}
+      className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm min-h-[38px] bg-white cursor-text empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400"
+      data-placeholder={placeholder}
+      dangerouslySetInnerHTML={{ __html: value }}
+    />
+  );
+};
+
 const ROMAN_NUMERALS = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
 
 export default function LetterForm() {
@@ -111,24 +142,14 @@ export default function LetterForm() {
     setItems(newItems);
   };
 
-  const applyFormat = (index: number, tag: string) => {
-    const input = document.getElementById(`desc-${index}`) as HTMLInputElement;
-    if (!input) return;
-    
-    const start = input.selectionStart || 0;
-    const end = input.selectionEnd || 0;
-    const currentVal = items[index].description;
-    
-    const selectedText = currentVal.substring(start, end);
-    const beforeText = currentVal.substring(0, start);
-    const afterText = currentVal.substring(end);
-    
-    const newText = `${beforeText}<${tag}>${selectedText}</${tag}>${afterText}`;
-    handleItemChange(index, 'description', newText);
+  const applyFormat = (index: number, command: string) => {
+    document.execCommand(command, false, undefined);
     
     setTimeout(() => {
-      input.focus();
-      input.setSelectionRange(start + tag.length + 2, start + tag.length + 2 + selectedText.length);
+      const el = document.getElementById(`desc-${index}`);
+      if (el) {
+        handleItemChange(index, 'description', el.innerHTML);
+      }
     }, 0);
   };
 
@@ -400,18 +421,15 @@ export default function LetterForm() {
                       <div className="flex justify-between items-center mb-1">
                         <label className="block text-xs font-medium text-gray-700">Deskripsi</label>
                         <div className="flex space-x-1">
-                          <button type="button" onClick={() => applyFormat(index, 'b')} className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded" title="Bold"><Bold size={14} /></button>
-                          <button type="button" onClick={() => applyFormat(index, 'i')} className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded" title="Italic"><Italic size={14} /></button>
-                          <button type="button" onClick={() => applyFormat(index, 'u')} className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded" title="Underline"><Underline size={14} /></button>
+                          <button type="button" onMouseDown={(e) => { e.preventDefault(); applyFormat(index, 'bold'); }} className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded" title="Bold"><Bold size={14} /></button>
+                          <button type="button" onMouseDown={(e) => { e.preventDefault(); applyFormat(index, 'italic'); }} className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded" title="Italic"><Italic size={14} /></button>
+                          <button type="button" onMouseDown={(e) => { e.preventDefault(); applyFormat(index, 'underline'); }} className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded" title="Underline"><Underline size={14} /></button>
                         </div>
                       </div>
-                      <input
-                        type="text"
+                      <ContentEditable
                         id={`desc-${index}`}
-                        required
                         value={item.description}
-                        onChange={(e) => handleItemChange(index, 'description', e.target.value)}
-                        className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                        onChange={(val) => handleItemChange(index, 'description', val)}
                         placeholder="Contoh: Advertorial Banner Web uk. 300x85"
                       />
                     </div>
