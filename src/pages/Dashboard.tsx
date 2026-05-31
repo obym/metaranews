@@ -12,7 +12,8 @@ export default function Dashboard() {
     totalRevenue: 0,
     invoices: 0,
     clients: 0,
-    loyalty: 78
+    loyalty: 78,
+    incentiveFee: 0
   });
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
   const [recentInvoices, setRecentInvoices] = useState<any[]>([]);
@@ -39,6 +40,7 @@ export default function Dashboard() {
         const allLettersSnapshot = await getDocs(allLettersQuery);
         
         let revenue = 0;
+        let totalIncentive = 0;
         let invCount = 0;
         const currentYear = new Date().getFullYear();
         const monthlyRev = new Array(12).fill(0);
@@ -51,12 +53,13 @@ export default function Dashboard() {
           
           if (data.type === 'invoice') {
             invCount++;
-            revenue += (data.subTotal || 0);
+            revenue += (data.paidAmount || 0);
+            totalIncentive += (data.incentiveFee || 0);
             
             if (data.date) {
               const date = new Date(data.date);
               if (date.getFullYear() === currentYear) {
-                monthlyRev[date.getMonth()] += (data.subTotal || 0);
+                monthlyRev[date.getMonth()] += (data.paidAmount || 0);
               }
             }
           }
@@ -66,7 +69,8 @@ export default function Dashboard() {
           totalRevenue: revenue,
           invoices: invCount,
           clients: clientsSnapshot.size,
-          loyalty: 78
+          loyalty: 78,
+          incentiveFee: totalIncentive
         });
 
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -135,10 +139,10 @@ export default function Dashboard() {
             <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-500">
               <CircleDollarSign size={20} strokeWidth={2.5} />
             </div>
-            <span className="text-[13px] font-semibold text-gray-500">Total Revenue</span>
+            <span className="text-[13px] font-semibold text-gray-500">Total Dana Masuk</span>
           </div>
           <div className="flex items-end justify-between">
-            <span className="text-[28px] font-bold text-gray-900 tracking-tight leading-none">{formatCurrency(stats.totalRevenue, true)}</span>
+            <span className="text-[28px] font-bold text-gray-900 tracking-tight leading-none">{formatCurrency(stats.totalRevenue)}</span>
             <span className="text-[11px] font-extrabold text-green-600 bg-green-50/80 px-2 py-0.5 rounded flex items-center gap-1">+12% &uarr;</span>
           </div>
         </div>
@@ -177,7 +181,7 @@ export default function Dashboard() {
             <span className="text-[13px] font-semibold text-gray-500">Fee Insentif / Cashback</span>
           </div>
           <div className="flex items-end justify-between">
-            <span className="text-[28px] font-bold text-gray-900 tracking-tight leading-none">Rp 0</span>
+            <span className="text-[28px] font-bold text-gray-900 tracking-tight leading-none">{formatCurrency(stats.incentiveFee)}</span>
             <span className="text-[11px] font-extrabold text-gray-500 bg-gray-50 px-2 py-0.5 rounded flex items-center gap-1">0%</span>
           </div>
         </div>
@@ -187,7 +191,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-[24px] p-8 shadow-sm border border-gray-100 lg:col-span-2 hover:shadow-md transition-shadow">
           <div className="mb-8">
-            <h3 className="text-[13px] font-bold text-gray-400 mb-2">Monthly Revenue</h3>
+            <h3 className="text-[13px] font-bold text-gray-400 mb-2">Dana Masuk Bulanan</h3>
             <div className="text-[32px] font-bold text-gray-900 leading-none">
               {formatCurrency(monthlyData[new Date().getMonth()]?.revenue || 0)}
             </div>
