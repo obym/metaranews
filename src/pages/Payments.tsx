@@ -170,7 +170,13 @@ export default function Payments() {
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-right">
                           {isEditing ? (
-                            <span className="text-gray-400">{formatCurrency(invoice.subTotal - editForm.paidAmount)}</span>
+                            <input
+                              type="number"
+                              className="w-full min-w-[120px] text-right border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                              value={invoice.subTotal - editForm.paidAmount}
+                              onChange={(e) => setEditForm({ ...editForm, paidAmount: invoice.subTotal - Number(e.target.value) })}
+                              placeholder="0"
+                            />
                           ) : (
                             <span className={sisa > 0 ? "text-red-600 font-medium" : "text-green-600 font-medium"}>
                               {formatCurrency(sisa)}
