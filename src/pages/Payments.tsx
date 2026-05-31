@@ -14,6 +14,7 @@ interface Letter {
   clientName: string;
   subTotal: number;
   paidAmount?: number;
+  remainingAmount?: number;
   incentiveFee?: number;
 }
 
@@ -21,7 +22,7 @@ export default function Payments() {
   const { user, role } = useAuth();
   const [invoices, setInvoices] = useState<Letter[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ paidAmount: 0, incentiveFee: 0 });
+  const [editForm, setEditForm] = useState({ paidAmount: 0, remainingAmount: 0, incentiveFee: 0 });
 
   useEffect(() => {
     if (!user) return;
@@ -58,6 +59,7 @@ export default function Payments() {
     setEditingId(invoice.id);
     setEditForm({
       paidAmount: invoice.paidAmount || 0,
+      remainingAmount: invoice.remainingAmount !== undefined ? invoice.remainingAmount : (invoice.subTotal - (invoice.paidAmount || 0)),
       incentiveFee: invoice.incentiveFee || 0,
     });
   };
@@ -70,6 +72,7 @@ export default function Payments() {
     try {
       await updateDoc(doc(db, 'letters', id), {
         paidAmount: editForm.paidAmount,
+        remainingAmount: editForm.remainingAmount,
         incentiveFee: editForm.incentiveFee,
       });
       setEditingId(null);
@@ -86,7 +89,7 @@ export default function Payments() {
   const totalMasuk = invoices.reduce((sum, inv) => sum + (inv.paidAmount || 0), 0);
   const totalInsentif = invoices.reduce((sum, inv) => sum + (inv.incentiveFee || 0), 0);
   const totalTagihan = invoices.reduce((sum, inv) => sum + inv.subTotal, 0);
-  const totalSisa = invoices.reduce((sum, inv) => sum + (inv.subTotal - (inv.paidAmount || 0)), 0);
+  const totalSisa = invoices.reduce((sum, inv) => sum + (inv.remainingAmount !== undefined ? inv.remainingAmount : (inv.subTotal - (inv.paidAmount || 0))), 0);
 
   return (
     <div>
@@ -140,7 +143,7 @@ export default function Payments() {
                     const isEditing = editingId === invoice.id;
                     const paid = invoice.paidAmount || 0;
                     const insentif = invoice.incentiveFee || 0;
-                    const sisa = invoice.subTotal - paid;
+                    const sisa = invoice.remainingAmount !== undefined ? invoice.remainingAmount : (invoice.subTotal - paid);
                     const isPaid = sisa <= 0;
 
                     return (
@@ -173,8 +176,8 @@ export default function Payments() {
                             <input
                               type="number"
                               className="w-full min-w-[120px] text-right border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
-                              value={invoice.subTotal - editForm.paidAmount}
-                              onChange={(e) => setEditForm({ ...editForm, paidAmount: invoice.subTotal - Number(e.target.value) })}
+                              value={editForm.remainingAmount === 0 ? '' : editForm.remainingAmount}
+                              onChange={(e) => setEditForm({ ...editForm, remainingAmount: Number(e.target.value) })}
                               placeholder="0"
                             />
                           ) : (
