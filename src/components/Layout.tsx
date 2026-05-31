@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LayoutDashboard, Users, FileText, Settings, LogOut, Menu, X, Hash, CreditCard } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Settings, LogOut, Menu, X, Hash, CreditCard, FolderOpen } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 export default function Layout() {
@@ -14,6 +14,7 @@ export default function Layout() {
     { name: 'Klien', href: '/clients', icon: Users },
     { name: 'Surat & Invoice', href: '/letters', icon: FileText },
     { name: 'Pembayaran', href: '/payments', icon: CreditCard },
+    { name: 'Dokumen', href: '/documents', icon: FolderOpen },
     { name: 'Nomor Surat', href: '/counters', icon: Hash },
     { name: 'Pengaturan', href: '/settings', icon: Settings },
   ];

@@ -84,6 +84,15 @@ service cloud.firestore {
       allow read, write: if isAuthenticated();
     }
     
+    match /documents/{docId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin() && 
+                    hasRequiredFields(['title', 'url', 'ownerId', 'createdAt']) && 
+                    uidUnchanged();
+      allow update: if isAdmin() && uidNotModified();
+      allow delete: if isAdmin();
+    }
+    
     match /users/{userId} {
       allow read, write: if isAuthenticated();
     }
