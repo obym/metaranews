@@ -18,6 +18,11 @@ export default function Dashboard() {
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
   const [recentInvoices, setRecentInvoices] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
+  const [allLettersData, setAllLettersData] = useState<any[]>([]);
+  const [clientCount, setClientCount] = useState<number>(0);
+  const [selectedMonth, setSelectedMonth] = useState<number | 'all'>('all');
+  const currentYear = new Date().getFullYear();
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   useEffect(() => {
     if (!user) return;
@@ -39,45 +44,15 @@ export default function Dashboard() {
            : query(collection(db, 'letters'), where('ownerId', '==', user.uid));
         const allLettersSnapshot = await getDocs(allLettersQuery);
         
-        let revenue = 0;
-        let totalIncentive = 0;
-        let invCount = 0;
-        const currentYear = new Date().getFullYear();
-        const monthlyRev = new Array(12).fill(0);
-        
         const allLetters: any[] = [];
         
         allLettersSnapshot.forEach(doc => {
           const data = doc.data();
           allLetters.push({ id: doc.id, clientName: clientNames.get(data.clientId) || data.clientName || 'Unknown', ...data });
-          
-          if (data.type === 'invoice') {
-            invCount++;
-            revenue += (data.paidAmount || 0);
-            totalIncentive += (data.incentiveFee || 0);
-            
-            if (data.date) {
-              const date = new Date(data.date);
-              if (date.getFullYear() === currentYear) {
-                monthlyRev[date.getMonth()] += (data.paidAmount || 0);
-              }
-            }
-          }
         });
         
-        setStats({
-          totalRevenue: revenue,
-          invoices: invCount,
-          clients: clientsSnapshot.size,
-          loyalty: 78,
-          incentiveFee: totalIncentive
-        });
-
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        setMonthlyData(monthlyRev.map((val, idx) => ({
-          name: monthNames[idx],
-          revenue: val
-        })));
+        setAllLettersData(allLetters);
+        setClientCount(clientsSnapshot.size);
         
         allLetters.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         
@@ -93,6 +68,54 @@ export default function Dashboard() {
 
     fetchDashboardData();
   }, [user, role]);
+
+  useEffect(() => {
+    let revenue = 0;
+    let totalIncentive = 0;
+    let invCount = 0;
+    
+    const monthlyRev = new Array(12).fill(0);
+    const invoicesOnly = allLettersData.filter(l => l.type === 'invoice');
+
+    invoicesOnly.forEach(data => {
+      const date = data.date ? new Date(data.date) : null;
+      const dataMonth = date ? date.getMonth() : -1;
+      const dataYear = date ? date.getFullYear() : -1;
+
+      if (dataYear === currentYear) {
+        monthlyRev[dataMonth] += (data.paidAmount || 0);
+      }
+
+      let includeInStats = false;
+      if (selectedMonth === 'all') {
+        includeInStats = true;
+      } else {
+        if (dataYear === currentYear && dataMonth === selectedMonth) {
+          includeInStats = true;
+        }
+      }
+
+      if (includeInStats) {
+        invCount++;
+        revenue += (data.paidAmount || 0);
+        totalIncentive += (data.incentiveFee || 0);
+      }
+    });
+
+    setStats({
+      totalRevenue: revenue,
+      invoices: invCount,
+      clients: clientCount,
+      loyalty: 78,
+      incentiveFee: totalIncentive
+    });
+
+    setMonthlyData(monthlyRev.map((val, idx) => ({
+      name: monthNames[idx],
+      revenue: val
+    })));
+
+  }, [selectedMonth, allLettersData, clientCount]);
 
   const formatCurrency = (val: number, compact = false) => {
     if (compact) {
@@ -130,6 +153,16 @@ export default function Dashboard() {
     <div className="w-full text-gray-800 font-sans">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <select 
+          value={selectedMonth} 
+          onChange={(e) => setSelectedMonth(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+          className="border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm text-sm"
+        >
+          <option value="all">Semua Bulan</option>
+          {monthNames.map((m, idx) => (
+            <option key={idx} value={idx}>{m} {currentYear}</option>
+          ))}
+        </select>
       </div>
 
       {/* Top Stats Row */}
