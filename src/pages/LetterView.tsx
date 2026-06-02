@@ -65,16 +65,35 @@ export default function LetterView() {
     
     setIsGeneratingPdf(true);
     try {
+      // Find all images and temporarily rewrite their src to go through a CORS proxy to bypass html2canvas tainting
+      const images = Array.from(componentRef.current.querySelectorAll('img')) as HTMLImageElement[];
+      const originalSrcs = images.map(img => img.src);
+      
+      images.forEach(img => {
+        if (img.src && img.src.startsWith('http')) {
+          img.crossOrigin = 'anonymous';
+          img.src = `https://corsproxy.io/?${encodeURIComponent(img.src)}`;
+        }
+      });
+
+      // Wait a moment for proxied images to load
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
       const canvas = await html2canvas(componentRef.current, {
         scale: 2, // Higher quality
         useCORS: true, // For images from different domains
         logging: false,
+        allowTaint: true, // We allow taint but try to prevent it with proxy
+      });
+
+      // Restore original sources
+      images.forEach((img, i) => {
+        img.src = originalSrcs[i];
+        img.removeAttribute('crossOrigin');
       });
 
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
       
-      // F4 size in mm is approximately 210 x 330
-      // We will use A4 size for PDF (210 x 297mm) or F4 if needed
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -90,7 +109,7 @@ export default function LetterView() {
       pdf.save(fileName);
     } catch (error) {
       console.error("Error generating PDF:", error);
-      alert("Terjadi kesalahan saat membuat PDF.");
+      alert("Terjadi kesalahan saat membuat PDF. Pastikan koneksi stabil.");
     } finally {
       setIsGeneratingPdf(false);
     }
@@ -236,10 +255,10 @@ export default function LetterView() {
                   {letter.items.map((item, index) => (
                     <tr key={index} className="bg-[#e6e6e6]">
                       <td className="py-4 px-4 print:py-1 print:px-2 text-sm print:text-[11px] border border-gray-800 print:leading-tight" dangerouslySetInnerHTML={{ __html: item.description }}></td>
-                      <td className="py-4 px-4 print:py-1 print:px-2 text-center text-sm print:text-[11px] border border-gray-800 print:leading-tight">{item.qty}</td>
-                      <td className="py-4 px-4 print:py-1 print:px-2 text-center text-sm print:text-[11px] border border-gray-800 print:leading-tight">{item.period}</td>
-                      <td className="py-4 px-4 print:py-1 print:px-2 text-right text-sm print:text-[11px] border border-gray-800 print:leading-tight">{formatCurrency(item.price)}</td>
-                      <td className="py-4 px-4 print:py-1 print:px-2 text-right text-sm print:text-[11px] border border-gray-800 print:leading-tight">{formatCurrency(item.total)}</td>
+                      <td className="py-4 px-4 print:py-1 print:px-2 text-center text-sm print:text-[11px] border border-gray-800 print:leading-tight" style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}>{item.qty}</td>
+                      <td className="py-4 px-4 print:py-1 print:px-2 text-center text-sm print:text-[11px] border border-gray-800 print:leading-tight" style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}>{item.period}</td>
+                      <td className="py-4 px-4 print:py-1 print:px-2 text-right text-sm print:text-[11px] border border-gray-800 print:leading-tight" style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}>{formatCurrency(item.price)}</td>
+                      <td className="py-4 px-4 print:py-1 print:px-2 text-right text-sm print:text-[11px] border border-gray-800 print:leading-tight" style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}>{formatCurrency(item.total)}</td>
                     </tr>
                   ))}
                   {/* Fill empty space if items are few */}
@@ -340,10 +359,10 @@ export default function LetterView() {
                 <tbody>
                   {letter.items.map((item, index) => (
                     <tr key={index}>
-                      <td className="border border-black py-2 px-3">{item.description.replace(/<[^>]*>?/gm, '').split(' ')[0] || 'Advertorial'}</td>
+                      <td className="border border-black py-2 px-3" style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}>{item.description.replace(/<[^>]*>?/gm, '').split(' ')[0] || 'Advertorial'}</td>
                       <td className="border border-black py-2 px-3" dangerouslySetInnerHTML={{ __html: item.description }}></td>
-                      <td className="border border-black py-2 px-3">{item.qty}x tayang/{item.period}</td>
-                      <td className="border border-black py-2 px-3">{formatCurrency(item.price)}</td>
+                      <td className="border border-black py-2 px-3" style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}>{item.qty}x tayang/{item.period}</td>
+                      <td className="border border-black py-2 px-3" style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}>{formatCurrency(item.price)}</td>
                     </tr>
                   ))}
                 </tbody>

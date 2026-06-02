@@ -17,6 +17,7 @@ interface Item {
   period: string;
   price: number;
   total: number;
+  fontSize?: string;
 }
 
 const ContentEditable = ({ value, onChange, id, placeholder }: { value: string, onChange: (val: string) => void, id: string, placeholder?: string }) => {
@@ -433,6 +434,7 @@ export default function LetterForm() {
                           <select 
                             onChange={(e) => {
                               applyFormat(index, 'fontSize', e.target.value);
+                              handleItemChange(index, 'fontSize', e.target.value);
                               // Reset select after applying format
                               e.target.value = '';
                             }}
@@ -467,6 +469,7 @@ export default function LetterForm() {
                           value={item.qty}
                           onChange={(e) => handleItemChange(index, 'qty', Number(e.target.value))}
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                          style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}
                         />
                       </div>
                       <div>
@@ -477,6 +480,7 @@ export default function LetterForm() {
                           onChange={(e) => handleItemChange(index, 'period', e.target.value)}
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
                           placeholder="Contoh: April 2026"
+                          style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}
                         />
                       </div>
                       <div>
@@ -488,6 +492,7 @@ export default function LetterForm() {
                           value={item.price}
                           onChange={(e) => handleItemChange(index, 'price', Number(e.target.value))}
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                          style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}
                         />
                       </div>
                       <div>
@@ -497,6 +502,7 @@ export default function LetterForm() {
                           readOnly
                           value={item.total}
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-100 sm:text-sm"
+                          style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}
                         />
                       </div>
                     </div>
