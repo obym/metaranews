@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Printer, ArrowLeft } from 'lucide-react';
+import { Printer, ArrowLeft, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface Letter {
   id: string;
@@ -47,6 +49,8 @@ export default function LetterView() {
     fetchLetter();
   }, [id]);
 
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
   const handlePrint = () => {
     if (window !== window.top) {
       setShowPrintWarning(true);
@@ -54,6 +58,42 @@ export default function LetterView() {
     setTimeout(() => {
       window.print();
     }, 100);
+  };
+
+  const handleDownloadPdf = async () => {
+    if (!componentRef.current || !letter) return;
+    
+    setIsGeneratingPdf(true);
+    try {
+      const canvas = await html2canvas(componentRef.current, {
+        scale: 2, // Higher quality
+        useCORS: true, // For images from different domains
+        logging: false,
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      
+      // F4 size in mm is approximately 210 x 330
+      // We will use A4 size for PDF (210 x 297mm) or F4 if needed
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [210, 330] // F4
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+      
+      const fileName = `${letter.type === 'invoice' ? 'Invoice' : 'Penawaran'}_${letter.number.replace(/\//g, '-')}.pdf`;
+      pdf.save(fileName);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("Terjadi kesalahan saat membuat PDF.");
+    } finally {
+      setIsGeneratingPdf(false);
+    }
   };
 
   const formatCurrency = (amount: number) => {
@@ -84,13 +124,23 @@ export default function LetterView() {
             Detail {letter.type === 'invoice' ? 'Invoice' : 'Surat Penawaran'}
           </h1>
         </div>
-        <button
-          onClick={handlePrint}
-          className="inline-flex items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-        >
-          <Printer className="h-4 w-4 mr-2" />
-          Cetak / PDF
-        </button>
+        <div className="flex space-x-3">
+          <button
+            onClick={handleDownloadPdf}
+            disabled={isGeneratingPdf}
+            className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            {isGeneratingPdf ? 'Membuat PDF...' : 'Download PDF'}
+          </button>
+          <button
+            onClick={handlePrint}
+            className="inline-flex items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+          >
+            <Printer className="h-4 w-4 mr-2" />
+            Cetak
+          </button>
+        </div>
       </div>
 
       {showPrintWarning && (
