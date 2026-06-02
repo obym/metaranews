@@ -65,31 +65,42 @@ export default function LetterView() {
     
     setIsGeneratingPdf(true);
     try {
-      // Find all images and temporarily rewrite their src to go through a CORS proxy to bypass html2canvas tainting
+      // Find all images and temporarily rewrite their src to data URLs to completely bypass html2canvas CORS issues
       const images = Array.from(componentRef.current.querySelectorAll('img')) as HTMLImageElement[];
       const originalSrcs = images.map(img => img.src);
       
-      images.forEach(img => {
+      for (let i = 0; i < images.length; i++) {
+        const img = images[i];
         if (img.src && img.src.startsWith('http')) {
-          img.crossOrigin = 'anonymous';
-          img.src = `https://corsproxy.io/?${encodeURIComponent(img.src)}`;
+          try {
+            // Fetch proxy bypassing CORS
+            const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(img.src)}`);
+            const blob = await res.blob();
+            const reader = new FileReader();
+            const dataUrl = await new Promise<string>((resolve, reject) => {
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.onerror = reject;
+              reader.readAsDataURL(blob);
+            });
+            img.src = dataUrl;
+          } catch (e) {
+            console.warn('Failed to convert image to base64, skipping for PDF:', img.src, e);
+          }
         }
-      });
+      }
 
-      // Wait a moment for proxied images to load
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Wait a moment for layout to stabilize
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       const canvas = await html2canvas(componentRef.current, {
         scale: 2, // Higher quality
         useCORS: true, // For images from different domains
         logging: false,
-        allowTaint: true, // We allow taint but try to prevent it with proxy
       });
 
       // Restore original sources
       images.forEach((img, i) => {
         img.src = originalSrcs[i];
-        img.removeAttribute('crossOrigin');
       });
 
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
