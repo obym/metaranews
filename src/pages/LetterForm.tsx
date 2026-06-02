@@ -147,8 +147,8 @@ export default function LetterForm() {
     setItems(newItems);
   };
 
-  const applyFormat = (index: number, command: string) => {
-    document.execCommand(command, false, undefined);
+  const applyFormat = (index: number, command: string, value?: string) => {
+    document.execCommand(command, false, value);
     
     setTimeout(() => {
       const el = document.getElementById(`desc-${index}`);
@@ -425,10 +425,29 @@ export default function LetterForm() {
                     <div>
                       <div className="flex justify-between items-center mb-1">
                         <label className="block text-xs font-medium text-gray-700">Deskripsi</label>
-                        <div className="flex space-x-1">
+                        <div className="flex items-center space-x-1">
                           <button type="button" onMouseDown={(e) => { e.preventDefault(); applyFormat(index, 'bold'); }} className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded" title="Bold"><Bold size={14} /></button>
                           <button type="button" onMouseDown={(e) => { e.preventDefault(); applyFormat(index, 'italic'); }} className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded" title="Italic"><Italic size={14} /></button>
                           <button type="button" onMouseDown={(e) => { e.preventDefault(); applyFormat(index, 'underline'); }} className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded" title="Underline"><Underline size={14} /></button>
+                          <div className="h-4 border-l border-gray-300 mx-1"></div>
+                          <select 
+                            onChange={(e) => {
+                              applyFormat(index, 'fontSize', e.target.value);
+                              // Reset select after applying format
+                              e.target.value = '';
+                            }}
+                            className="bg-transparent border-none text-xs text-gray-500 hover:text-gray-700 focus:ring-0 p-0 cursor-pointer"
+                            title="Ukuran Font"
+                            defaultValue=""
+                          >
+                            <option value="" disabled>Ukuran</option>
+                            <option value="1">Sangat Kecil</option>
+                            <option value="2">Kecil</option>
+                            <option value="3">Normal</option>
+                            <option value="4">Sedang</option>
+                            <option value="5">Besar</option>
+                            <option value="6">Sangat Besar</option>
+                          </select>
                         </div>
                       </div>
                       <ContentEditable
