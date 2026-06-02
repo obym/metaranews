@@ -21,19 +21,24 @@ interface Item {
 
 const ContentEditable = ({ value, onChange, id, placeholder }: { value: string, onChange: (val: string) => void, id: string, placeholder?: string }) => {
   const contentEditableRef = React.useRef<HTMLDivElement>(null);
-  const initialValue = React.useRef(value);
+  const lastValue = React.useRef(value);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (contentEditableRef.current && contentEditableRef.current.innerHTML !== value) {
       if (document.activeElement !== contentEditableRef.current) {
         contentEditableRef.current.innerHTML = value;
       }
     }
+    lastValue.current = value;
   }, [value]);
 
   const handleInput = () => {
     if (contentEditableRef.current) {
-      onChange(contentEditableRef.current.innerHTML);
+      const html = contentEditableRef.current.innerHTML;
+      if (html !== lastValue.current) {
+        lastValue.current = html;
+        onChange(html);
+      }
     }
   };
 
@@ -46,7 +51,6 @@ const ContentEditable = ({ value, onChange, id, placeholder }: { value: string, 
       onBlur={handleInput}
       className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm min-h-[38px] bg-white cursor-text empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400"
       data-placeholder={placeholder}
-      dangerouslySetInnerHTML={{ __html: initialValue.current }}
     />
   );
 };
