@@ -129,14 +129,16 @@ export default function LetterForm() {
   }, [user, id, isEditMode, navigate]);
 
   const handleItemChange = (index: number, field: keyof Item, value: string | number) => {
-    const newItems = [...items];
-    newItems[index] = { ...newItems[index], [field]: value };
-    
-    if (field === 'qty' || field === 'price') {
-      newItems[index].total = Number(newItems[index].qty) * Number(newItems[index].price);
-    }
-    
-    setItems(newItems);
+    setItems((prevItems) => {
+      const newItems = [...prevItems];
+      newItems[index] = { ...newItems[index], [field]: value };
+      
+      if (field === 'qty' || field === 'price') {
+        newItems[index].total = Number(newItems[index].qty) * Number(newItems[index].price);
+      }
+      
+      return newItems;
+    });
   };
 
   const addItem = () => {

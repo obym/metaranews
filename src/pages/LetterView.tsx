@@ -6,7 +6,7 @@ import { Printer, ArrowLeft, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 
 interface Letter {
   id: string;
@@ -65,42 +65,11 @@ export default function LetterView() {
     
     setIsGeneratingPdf(true);
     try {
-      // Find all images and temporarily rewrite their src to data URLs to completely bypass html2canvas CORS issues
-      const images = Array.from(componentRef.current.querySelectorAll('img')) as HTMLImageElement[];
-      const originalSrcs = images.map(img => img.src);
-      
-      for (let i = 0; i < images.length; i++) {
-        const img = images[i];
-        if (img.src && img.src.startsWith('http')) {
-          try {
-            // Fetch proxy bypassing CORS
-            const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(img.src)}`);
-            const blob = await res.blob();
-            const reader = new FileReader();
-            const dataUrl = await new Promise<string>((resolve, reject) => {
-              reader.onloadend = () => resolve(reader.result as string);
-              reader.onerror = reject;
-              reader.readAsDataURL(blob);
-            });
-            img.src = dataUrl;
-          } catch (e) {
-            console.warn('Failed to convert image to base64, skipping for PDF:', img.src, e);
-          }
-        }
-      }
-
-      // Wait a moment for layout to stabilize
-      await new Promise(resolve => setTimeout(resolve, 500));
-
       const canvas = await html2canvas(componentRef.current, {
         scale: 2, // Higher quality
         useCORS: true, // For images from different domains
         logging: false,
-      });
-
-      // Restore original sources
-      images.forEach((img, i) => {
-        img.src = originalSrcs[i];
+        allowTaint: false,
       });
 
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
