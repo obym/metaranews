@@ -20,7 +20,7 @@ interface Item {
   fontSize?: string;
 }
 
-const ContentEditable = ({ value, onChange, id, placeholder }: { value: string, onChange: (val: string) => void, id: string, placeholder?: string }) => {
+const ContentEditable = ({ value, onChange, id, placeholder, style }: { value: string, onChange: (val: string) => void, id: string, placeholder?: string, style?: React.CSSProperties }) => {
   const contentEditableRef = React.useRef<HTMLDivElement>(null);
   const lastValue = React.useRef(value);
 
@@ -52,6 +52,7 @@ const ContentEditable = ({ value, onChange, id, placeholder }: { value: string, 
       onBlur={handleInput}
       className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm min-h-[38px] bg-white cursor-text empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400"
       data-placeholder={placeholder}
+      style={style}
     />
   );
 };
@@ -459,6 +460,7 @@ export default function LetterForm() {
                         value={item.description}
                         onChange={(val) => handleItemChange(index, 'description', val)}
                         placeholder="Contoh: Advertorial Banner Web uk. 300x85"
+                        style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}
                       />
                     </div>
                     <div className="grid grid-cols-4 gap-4">

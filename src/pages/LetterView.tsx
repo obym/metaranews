@@ -50,6 +50,25 @@ export default function LetterView() {
   }, [id]);
 
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [logoBase64, setLogoBase64] = useState<string>('');
+
+  useEffect(() => {
+    // Load logo as base64 to avoid html2canvas CORS issues when generating PDF
+    const loadLogo = async () => {
+      try {
+        const response = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://lh3.googleusercontent.com/d/1kwvd_i_n0IWw59fxQEnVD36mqEp7n1iA'));
+        const blob = await response.blob();
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setLogoBase64(reader.result as string);
+        };
+        reader.readAsDataURL(blob);
+      } catch (error) {
+        console.error('Error loading logo base64', error);
+      }
+    };
+    loadLogo();
+  }, []);
 
   const handlePrint = () => {
     if (window !== window.top) {
@@ -176,10 +195,11 @@ export default function LetterView() {
           {/* Watermark */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] z-0">
             <img 
-              src="https://lh3.googleusercontent.com/d/1kwvd_i_n0IWw59fxQEnVD36mqEp7n1iA" 
+              src={logoBase64 || "https://lh3.googleusercontent.com/d/1kwvd_i_n0IWw59fxQEnVD36mqEp7n1iA"} 
               alt="Watermark" 
               className="w-[600px] h-auto object-contain"
               referrerPolicy="no-referrer"
+              crossOrigin="anonymous"
             />
           </div>
 
@@ -187,10 +207,11 @@ export default function LetterView() {
           <div className="flex justify-between items-start mb-8 relative z-10">
             <div className="w-1/3">
               <img 
-                src="https://lh3.googleusercontent.com/d/1kwvd_i_n0IWw59fxQEnVD36mqEp7n1iA" 
+                src={logoBase64 || "https://lh3.googleusercontent.com/d/1kwvd_i_n0IWw59fxQEnVD36mqEp7n1iA"} 
                 alt="Metaranews Logo" 
                 className="h-32 w-auto object-contain mt-2"
                 referrerPolicy="no-referrer"
+                crossOrigin="anonymous"
               />
             </div>
             <div className="w-2/3 text-right pr-6 mt-4">
@@ -234,7 +255,7 @@ export default function LetterView() {
                 <tbody>
                   {letter.items.map((item, index) => (
                     <tr key={index} className="bg-[#e6e6e6]">
-                      <td className="py-4 px-4 print:py-1 print:px-2 text-sm print:text-[11px] border border-gray-800 print:leading-tight" dangerouslySetInnerHTML={{ __html: item.description }}></td>
+                      <td className="py-4 px-4 print:py-1 print:px-2 text-sm print:text-[11px] border border-gray-800 print:leading-tight" dangerouslySetInnerHTML={{ __html: item.description }} style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}></td>
                       <td className="py-4 px-4 print:py-1 print:px-2 text-center text-sm print:text-[11px] border border-gray-800 print:leading-tight" style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}>{item.qty}</td>
                       <td className="py-4 px-4 print:py-1 print:px-2 text-center text-sm print:text-[11px] border border-gray-800 print:leading-tight" style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}>{item.period}</td>
                       <td className="py-4 px-4 print:py-1 print:px-2 text-right text-sm print:text-[11px] border border-gray-800 print:leading-tight" style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}>{formatCurrency(item.price)}</td>
@@ -340,7 +361,7 @@ export default function LetterView() {
                   {letter.items.map((item, index) => (
                     <tr key={index}>
                       <td className="border border-black py-2 px-3" style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}>{item.description.replace(/<[^>]*>?/gm, '').split(' ')[0] || 'Advertorial'}</td>
-                      <td className="border border-black py-2 px-3" dangerouslySetInnerHTML={{ __html: item.description }}></td>
+                      <td className="border border-black py-2 px-3" dangerouslySetInnerHTML={{ __html: item.description }} style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}></td>
                       <td className="border border-black py-2 px-3" style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}>{item.qty}x tayang/{item.period}</td>
                       <td className="border border-black py-2 px-3" style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}>{formatCurrency(item.price)}</td>
                     </tr>
