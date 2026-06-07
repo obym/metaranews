@@ -155,7 +155,7 @@ export default function Counters() {
                           </span>
                           {letter.items && letter.items.length > 0 && (
                             <span className="text-gray-500">
-                              - {letter.items[0].description} {letter.items.length > 1 ? `(+${letter.items.length - 1} item lainnya)` : ''}
+                              - {letter.items[0].description.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ')} {letter.items.length > 1 ? `(+${letter.items.length - 1} item lainnya)` : ''}
                             </span>
                           )}
                         </td>
