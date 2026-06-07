@@ -16,13 +16,14 @@ interface Letter {
   paidAmount?: number;
   remainingAmount?: number;
   incentiveFee?: number;
+  paymentDate?: string;
 }
 
 export default function Payments() {
   const { user, role } = useAuth();
   const [invoices, setInvoices] = useState<Letter[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ paidAmount: 0, remainingAmount: 0, incentiveFee: 0 });
+  const [editForm, setEditForm] = useState({ paidAmount: 0, remainingAmount: 0, incentiveFee: 0, paymentDate: '' });
 
   useEffect(() => {
     if (!user) return;
@@ -61,6 +62,7 @@ export default function Payments() {
       paidAmount: invoice.paidAmount || 0,
       remainingAmount: invoice.remainingAmount !== undefined ? invoice.remainingAmount : (invoice.subTotal - (invoice.paidAmount || 0)),
       incentiveFee: invoice.incentiveFee || 0,
+      paymentDate: invoice.paymentDate || '',
     });
   };
 
@@ -74,6 +76,7 @@ export default function Payments() {
         paidAmount: editForm.paidAmount,
         remainingAmount: editForm.remainingAmount,
         incentiveFee: editForm.incentiveFee,
+        paymentDate: editForm.paymentDate,
       });
       setEditingId(null);
     } catch (error) {
@@ -129,6 +132,7 @@ export default function Payments() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Invoice & Klien</th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Tanggal Dana Masuk</th>
                     <th scope="col" className="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">Nilai Invoice</th>
                     <th scope="col" className="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">Dana Masuk</th>
                     <th scope="col" className="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">Sisa Tagihan</th>
@@ -152,6 +156,20 @@ export default function Payments() {
                           <div className="font-medium text-gray-900">{invoice.number}</div>
                           <div className="text-gray-500">{invoice.clientName}</div>
                           <div className="text-xs text-gray-400 mt-0.5">{format(new Date(invoice.date), 'dd MMM yyyy', { locale: idLocale })}</div>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                          {isEditing ? (
+                            <input
+                              type="date"
+                              className="w-full min-w-[130px] border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                              value={editForm.paymentDate}
+                              onChange={(e) => setEditForm({ ...editForm, paymentDate: e.target.value })}
+                            />
+                          ) : (
+                            <span className="text-gray-500">
+                              {invoice.paymentDate ? format(new Date(invoice.paymentDate), 'dd MMM yyyy', { locale: idLocale }) : '-'}
+                            </span>
+                          )}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900 text-right font-medium">
                           {formatCurrency(invoice.subTotal)}
@@ -222,7 +240,7 @@ export default function Payments() {
                   })}
                   {invoices.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="py-8 text-center text-sm text-gray-500">
+                      <td colSpan={7} className="py-8 text-center text-sm text-gray-500">
                         Belum ada data invoice yang dibuat.
                       </td>
                     </tr>
