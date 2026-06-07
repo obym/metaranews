@@ -124,10 +124,10 @@ export default function Payments() {
         </div>
       </div>
 
-      <div className="flex flex-col">
-        <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+      <div className="flex flex-col mobile-cards">
+        <div className="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+            <div className="shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
               <table className="min-w-full divide-y divide-gray-300">
                 <thead className="bg-gray-50">
                   <tr>
@@ -152,12 +152,12 @@ export default function Payments() {
 
                     return (
                       <tr key={invoice.id} className={isPaid ? 'bg-green-50/30' : ''}>
-                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
+                        <td data-label="Invoice & Klien" className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6 flex-col-mobile">
                           <div className="font-medium text-gray-900">{invoice.number}</div>
                           <div className="text-gray-500">{invoice.clientName}</div>
                           <div className="text-xs text-gray-400 mt-0.5">{format(new Date(invoice.date), 'dd MMM yyyy', { locale: idLocale })}</div>
                         </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                        <td data-label="Tanggal Dana Masuk" className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
                           {isEditing ? (
                             <input
                               type="date"
@@ -171,10 +171,10 @@ export default function Payments() {
                             </span>
                           )}
                         </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900 text-right font-medium">
+                        <td data-label="Nilai Invoice" className="whitespace-nowrap px-3 py-4 text-sm text-gray-900 text-right font-medium">
                           {formatCurrency(invoice.subTotal)}
                         </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-right">
+                        <td data-label="Dana Masuk" className="whitespace-nowrap px-3 py-4 text-sm text-right">
                           {isEditing ? (
                             <input
                               type="number"
@@ -189,7 +189,7 @@ export default function Payments() {
                             </span>
                           )}
                         </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-right">
+                        <td data-label="Sisa Tagihan" className="whitespace-nowrap px-3 py-4 text-sm text-right">
                           {isEditing ? (
                             <input
                               type="number"
@@ -204,7 +204,7 @@ export default function Payments() {
                             </span>
                           )}
                         </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-right">
+                        <td data-label="Fee Insentif" className="whitespace-nowrap px-3 py-4 text-sm text-right">
                           {isEditing ? (
                             <input
                               type="number"
@@ -219,7 +219,7 @@ export default function Payments() {
                             </span>
                           )}
                         </td>
-                        <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                        <td data-label="Aksi" className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           {role !== 'supervisor' && (
                             isEditing ? (
                               <div className="flex justify-end space-x-2">

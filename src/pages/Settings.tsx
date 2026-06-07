@@ -74,7 +74,7 @@ export default function Settings() {
         {loading ? (
           <div className="p-8 text-center text-gray-500">Memuat pengguna...</div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto mobile-cards">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-[#FAFAFA]">
                 <tr>
@@ -95,7 +95,7 @@ export default function Settings() {
               <tbody className="divide-y divide-gray-200 bg-white">
                 {users.map((u) => (
                   <tr key={u.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                    <td data-label="Nama" className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium flex-col-mobile">
                       {u.name || (u.id === user?.uid ? user?.displayName : 'Unknown')}
                       {u.id === user?.uid && (
                         <span className="ml-2 text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
@@ -103,10 +103,10 @@ export default function Settings() {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td data-label="Email" className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {u.email}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td data-label="Role" className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium ${
                         u.role === 'admin' ? 'bg-indigo-50 text-indigo-700' : 
                         u.role === 'supervisor' ? 'bg-green-50 text-green-700' :
@@ -115,7 +115,7 @@ export default function Settings() {
                         {u.role === 'admin' ? 'Admin' : u.role === 'supervisor' ? 'Supervisor' : 'User'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <td data-label="Aksi" className="px-6 py-4 whitespace-nowrap text-sm">
                       {role === 'admin' ? (
                         <select
                           value={u.role}

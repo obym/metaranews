@@ -103,10 +103,10 @@ export default function Letters() {
         </div>
       </div>
 
-      <div className="mt-8 flex flex-col">
-        <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+      <div className="mt-8 flex flex-col mobile-cards">
+        <div className="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+            <div className="shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
               <table className="min-w-full divide-y divide-gray-300">
                 <thead className="bg-gray-50">
                   <tr>
@@ -123,20 +123,20 @@ export default function Letters() {
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {letters.map((letter) => (
                     <tr key={letter.id}>
-                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{letter.number}</td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                      <td data-label="Nomor Surat" className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{letter.number}</td>
+                      <td data-label="Jenis" className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
                           letter.type === 'invoice' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
                         }`}>
                           {letter.type === 'invoice' ? 'Invoice' : 'Penawaran'}
                         </span>
                       </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                      <td data-label="Tanggal" className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         {format(new Date(letter.date), 'dd MMM yyyy', { locale: idLocale })}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{letter.clientName}</td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{formatCurrency(letter.subTotal)}</td>
-                      <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                      <td data-label="Klien" className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{letter.clientName}</td>
+                      <td data-label="Total" className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{formatCurrency(letter.subTotal)}</td>
+                      <td data-label="Aksi" className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                         <Link to={`/letters/${letter.id}`} className="text-indigo-600 hover:text-indigo-900 mr-4 inline-block" title="Lihat">
                           <Eye className="h-4 w-4" />
                         </Link>

@@ -132,10 +132,10 @@ export default function Documents() {
         )}
       </div>
 
-      <div className="mt-8 flex flex-col">
-        <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+      <div className="mt-8 flex flex-col mobile-cards">
+        <div className="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+            <div className="shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
               <table className="min-w-full divide-y divide-gray-300">
                 <thead className="bg-gray-50">
                   <tr>
@@ -152,16 +152,16 @@ export default function Documents() {
                     const dateAdded = doc.createdAt?.toDate ? doc.createdAt.toDate() : new Date();
                     return (
                       <tr key={doc.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                        <td data-label="Judul Dokumen" className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6 flex-col-mobile">
                           <div className="flex items-center gap-2">
                             {doc.title}
                           </div>
                         </td>
-                        <td className="px-3 py-4 text-sm text-gray-500 max-w-xs truncate" title={doc.description}>{doc.description || '-'}</td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        <td data-label="Deskripsi" className="px-3 py-4 text-sm text-gray-500 max-w-xs truncate" title={doc.description}>{doc.description || '-'}</td>
+                        <td data-label="Tanggal Ditambahkan" className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           {format(dateAdded, 'dd MMM yyyy', { locale: idLocale })}
                         </td>
-                        <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                        <td data-label="Aksi" className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <div className="flex items-center justify-end gap-3">
                             <a 
                               href={doc.url} 

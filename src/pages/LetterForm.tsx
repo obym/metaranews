@@ -463,7 +463,7 @@ export default function LetterForm() {
                         style={item.fontSize ? { fontSize: ['10px', '13px', '16px', '18px', '24px', '32px'][Number(item.fontSize) - 1] } : undefined}
                       />
                     </div>
-                    <div className="grid grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       <div>
                         <label className="block text-xs font-medium text-gray-700">Qty</label>
                         <input

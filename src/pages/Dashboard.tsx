@@ -301,9 +301,10 @@ export default function Dashboard() {
         </div>
 
         {/* Recent Invoices */}
-        <div className="bg-white rounded-[24px] p-8 shadow-sm border border-gray-100 xl:col-span-2 overflow-x-auto hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-[24px] p-4 lg:p-8 shadow-sm border border-gray-100 xl:col-span-2 hover:shadow-md transition-shadow">
           <h3 className="text-lg font-bold text-gray-900 mb-6">Recent Invoices</h3>
-          <table className="w-full text-left border-collapse min-w-[500px]">
+          <div className="overflow-x-auto mobile-cards">
+          <table className="w-full text-left border-collapse md:min-w-[500px]">
             <thead>
               <tr className="text-[11px] uppercase tracking-wider text-gray-400 border-b border-gray-100">
                 <th className="pb-4 font-bold px-2 whitespace-nowrap">No</th>
@@ -316,11 +317,11 @@ export default function Dashboard() {
             <tbody className="text-sm">
               {recentInvoices.length > 0 ? recentInvoices.map((inv, idx) => (
                 <tr key={inv.id || idx} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors group">
-                  <td className="py-5 px-2 font-bold text-gray-600 text-[13px] group-hover:text-[#2563eb] transition-colors">{inv.number || 'Draft'}</td>
-                  <td className="py-5 px-2 text-gray-500 font-semibold text-[13px]">{formatDate(inv.date)}</td>
-                  <td className="py-5 px-2 font-bold text-gray-800 text-[13px]">{inv.clientName}</td>
-                  <td className="py-5 px-2 font-bold text-gray-900 text-[13px]">{formatCurrency(inv.subTotal || 0)}</td>
-                  <td className="py-5 px-2 text-right">
+                  <td data-label="No" className="py-5 px-2 font-bold text-gray-600 text-[13px] group-hover:text-[#2563eb] transition-colors">{inv.number || 'Draft'}</td>
+                  <td data-label="Date" className="py-5 px-2 text-gray-500 font-semibold text-[13px]">{formatDate(inv.date)}</td>
+                  <td data-label="Client" className="py-5 px-2 font-bold text-gray-800 text-[13px]">{inv.clientName}</td>
+                  <td data-label="Amount" className="py-5 px-2 font-bold text-gray-900 text-[13px]">{formatCurrency(inv.subTotal || 0)}</td>
+                  <td data-label="Status" className="py-5 px-2 text-right">
                     <span className={`inline-flex px-3 py-1.5 rounded-md text-[10px] font-black tracking-widest uppercase items-center justify-center ${
                       inv.status === 'paid' ? 'bg-green-50 text-green-600' : 
                       inv.status === 'overdue' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-500'
@@ -336,6 +337,7 @@ export default function Dashboard() {
               )}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </div>

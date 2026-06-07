@@ -112,10 +112,10 @@ export default function Counters() {
       </div>
 
       <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-        <div className="flex flex-col">
-          <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div className="flex flex-col mobile-cards">
+          <div className="-my-2 sm:-mx-6 lg:-mx-8">
             <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-              <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+              <div className="shadow border-b border-gray-200 sm:rounded-lg">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
@@ -140,16 +140,16 @@ export default function Counters() {
                       const format = slashIndex > -1 ? letter.number.substring(slashIndex) : '';
                       return (
                       <tr key={letter.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 border-r border-gray-100 bg-gray-50">
+                        <td data-label="No. Urut" className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 border-r border-gray-100 bg-gray-50 flex-col-mobile">
                           {urut}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
+                        <td data-label="Format Surat" className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
                           {format || '-'}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td data-label="Nama Perusahaan" className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {letter.clientName}
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-500">
+                        <td data-label="Keterangan" className="px-6 py-4 text-sm text-gray-500">
                           <span className="font-medium text-gray-900 mr-2">
                             {letter.type === 'invoice' ? 'Invoice' : 'Penawaran'}
                           </span>
