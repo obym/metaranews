@@ -27,8 +27,22 @@ export default function Counters() {
       snapshot.forEach((doc) => {
         lettersData.push({ id: doc.id, ...doc.data() } as Letter);
       });
-      // Sort by date descending
-      lettersData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      // Sort by no. urut descending
+      lettersData.sort((a, b) => {
+        const getUrut = (numStr: string) => {
+           if (!numStr) return 0;
+           const sIdx = numStr.indexOf('/');
+           const pfx = sIdx > -1 ? numStr.substring(0, sIdx) : numStr;
+           const num = parseInt(pfx, 10);
+           return isNaN(num) ? 0 : num;
+        };
+        const numA = getUrut(a.number);
+        const numB = getUrut(b.number);
+        if (numA !== numB) {
+            return numB - numA; // Descending
+        }
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      });
       setLetters(lettersData);
       
       // Admin syncs the global counter based on existing letters
