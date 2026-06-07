@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Shield, User as UserIcon } from 'lucide-react';
+import { Shield, User as UserIcon, Trash2 } from 'lucide-react';
 
 interface UserData {
   id: string;
@@ -58,6 +58,30 @@ export default function Settings() {
     } catch (error) {
       console.error("Error updating role", error);
       alert("Gagal memperbarui role.");
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (role !== 'admin') {
+      alert("Hanya admin yang dapat menghapus pengguna.");
+      return;
+    }
+
+    if (userId === user?.uid) {
+      alert("Anda tidak dapat menghapus akun Anda sendiri.");
+      return;
+    }
+
+    if (!window.confirm("Apakah Anda yakin ingin menghapus pengguna ini?")) {
+      return;
+    }
+
+    try {
+      await deleteDoc(doc(db, 'users', userId));
+      setUsers(users.filter(u => u.id !== userId));
+    } catch (error) {
+      console.error("Error deleting user", error);
+      alert("Gagal menghapus pengguna.");
     }
   };
 
@@ -117,16 +141,27 @@ export default function Settings() {
                     </td>
                     <td data-label="Aksi" className="px-6 py-4 whitespace-nowrap text-sm">
                       {role === 'admin' ? (
-                        <select
-                          value={u.role}
-                          onChange={(e) => handleRoleChange(u.id, e.target.value as 'admin' | 'supervisor' | 'user')}
-                          disabled={u.id === user?.uid}
-                          className="block w-full pl-3 pr-8 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-500"
-                        >
-                          <option value="admin">Admin</option>
-                          <option value="supervisor">Supervisor</option>
-                          <option value="user">User</option>
-                        </select>
+                        <div className="flex items-center space-x-2">
+                          <select
+                            value={u.role}
+                            onChange={(e) => handleRoleChange(u.id, e.target.value as 'admin' | 'supervisor' | 'user')}
+                            disabled={u.id === user?.uid}
+                            className="block w-full pl-3 pr-8 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-500"
+                          >
+                            <option value="admin">Admin</option>
+                            <option value="supervisor">Supervisor</option>
+                            <option value="user">User</option>
+                          </select>
+                          {u.id !== user?.uid && (
+                            <button
+                              onClick={() => handleDeleteUser(u.id)}
+                              className="text-red-600 hover:text-red-900"
+                              title="Hapus Pengguna"
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </button>
+                          )}
+                        </div>
                       ) : (
                         <span className="text-gray-400">-</span>
                       )}
