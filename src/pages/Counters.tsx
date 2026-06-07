@@ -46,7 +46,7 @@ export default function Counters() {
       setLetters(lettersData);
       
       // Admin syncs the global counter based on existing letters
-      if (role === 'admin' && lettersData.length > 0) {
+      if ((role === 'admin' || role === 'supervisor') && lettersData.length > 0) {
         try {
           const currentYear = new Date().getFullYear();
           let maxCount = 0;

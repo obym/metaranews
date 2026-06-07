@@ -29,7 +29,7 @@ export default function Dashboard() {
 
     const fetchDashboardData = async () => {
       try {
-        const clientsQuery = role === 'admin' 
+        const clientsQuery = (role === 'admin' || role === 'supervisor')
           ? query(collection(db, 'clients'))
           : query(collection(db, 'clients'), where('ownerId', '==', user.uid));
         const clientsSnapshot = await getDocs(clientsQuery);
@@ -39,7 +39,7 @@ export default function Dashboard() {
           clientNames.set(doc.id, doc.data().name);
         });
 
-        const allLettersQuery = role === 'admin'
+        const allLettersQuery = (role === 'admin' || role === 'supervisor')
            ? query(collection(db, 'letters'))
            : query(collection(db, 'letters'), where('ownerId', '==', user.uid));
         const allLettersSnapshot = await getDocs(allLettersQuery);

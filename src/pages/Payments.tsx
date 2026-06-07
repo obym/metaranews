@@ -29,7 +29,7 @@ export default function Payments() {
     if (!user) return;
 
     const baseQuery = query(collection(db, 'letters'), where('type', '==', 'invoice'));
-    const q = role === 'admin' 
+    const q = (role === 'admin' || role === 'supervisor')
       ? baseQuery
       : query(collection(db, 'letters'), where('type', '==', 'invoice'), where('ownerId', '==', user.uid));
       
@@ -220,19 +220,21 @@ export default function Payments() {
                           )}
                         </td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                          {isEditing ? (
-                            <div className="flex justify-end space-x-2">
-                              <button onClick={cancelEdit} className="text-gray-500 hover:text-gray-700" title="Batal">
-                                <X className="h-4 w-4" />
+                          {role !== 'supervisor' && (
+                            isEditing ? (
+                              <div className="flex justify-end space-x-2">
+                                <button onClick={cancelEdit} className="text-gray-500 hover:text-gray-700" title="Batal">
+                                  <X className="h-4 w-4" />
+                                </button>
+                                <button onClick={() => handleSave(invoice.id)} className="text-green-600 hover:text-green-900" title="Simpan">
+                                  <Save className="h-4 w-4" />
+                                </button>
+                              </div>
+                            ) : (
+                              <button onClick={() => handleEditClick(invoice)} className="text-blue-600 hover:text-blue-900" title="Edit Pembayaran">
+                                <Edit2 className="h-4 w-4" />
                               </button>
-                              <button onClick={() => handleSave(invoice.id)} className="text-green-600 hover:text-green-900" title="Simpan">
-                                <Save className="h-4 w-4" />
-                              </button>
-                            </div>
-                          ) : (
-                            <button onClick={() => handleEditClick(invoice)} className="text-blue-600 hover:text-blue-900" title="Edit Pembayaran">
-                              <Edit2 className="h-4 w-4" />
-                            </button>
+                            )
                           )}
                         </td>
                       </tr>

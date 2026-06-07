@@ -26,7 +26,7 @@ export default function Letters() {
   useEffect(() => {
     if (!user) return;
 
-    const q = role === 'admin' 
+    const q = (role === 'admin' || role === 'supervisor')
       ? query(collection(db, 'letters'))
       : query(collection(db, 'letters'), where('ownerId', '==', user.uid));
       
@@ -82,20 +82,24 @@ export default function Letters() {
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none flex space-x-3">
-          <button
-            onClick={() => navigate('/letters/new?type=penawaran')}
-            className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:w-auto"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Buat Penawaran
-          </button>
-          <button
-            onClick={() => navigate('/letters/new?type=invoice')}
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:w-auto"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Buat Invoice
-          </button>
+          {role !== 'supervisor' && (
+            <>
+              <button
+                onClick={() => navigate('/letters/new?type=penawaran')}
+                className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:w-auto"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Buat Penawaran
+              </button>
+              <button
+                onClick={() => navigate('/letters/new?type=invoice')}
+                className="inline-flex items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:w-auto"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Buat Invoice
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -136,12 +140,16 @@ export default function Letters() {
                         <Link to={`/letters/${letter.id}`} className="text-indigo-600 hover:text-indigo-900 mr-4 inline-block" title="Lihat">
                           <Eye className="h-4 w-4" />
                         </Link>
-                        <Link to={`/letters/${letter.id}/edit`} className="text-blue-600 hover:text-blue-900 mr-4 inline-block" title="Edit">
-                          <Edit2 className="h-4 w-4" />
-                        </Link>
-                        <button onClick={() => setDeleteId(letter.id)} className="text-red-600 hover:text-red-900 inline-block" title="Hapus">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        {role !== 'supervisor' && (
+                          <>
+                            <Link to={`/letters/${letter.id}/edit`} className="text-blue-600 hover:text-blue-900 mr-4 inline-block" title="Edit">
+                              <Edit2 className="h-4 w-4" />
+                            </Link>
+                            <button onClick={() => setDeleteId(letter.id)} className="text-red-600 hover:text-red-900 inline-block" title="Hapus">
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </>
+                        )}
                       </td>
                     </tr>
                   ))}

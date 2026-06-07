@@ -8,7 +8,7 @@ interface UserData {
   id: string;
   email: string;
   name: string;
-  role: 'admin' | 'user';
+  role: 'admin' | 'supervisor' | 'user';
   createdAt: string;
   lastLoginAt: string;
 }
@@ -36,16 +36,17 @@ export default function Settings() {
     fetchUsers();
   }, []);
 
-  const handleRoleChange = async (userId: string, newRole: 'admin' | 'user') => {
+  const handleRoleChange = async (userId: string, newRole: 'admin' | 'supervisor' | 'user') => {
     if (role !== 'admin') {
       alert("Hanya admin yang dapat mengubah role pengguna.");
       return;
     }
     
     // Prevent removing the last admin (basic safeguard, could be improved)
-    if (newRole === 'user') {
+    if (newRole !== 'admin') {
+      const userToChange = users.find(u => u.id === userId);
       const adminCount = users.filter(u => u.role === 'admin').length;
-      if (adminCount <= 1) {
+      if (userToChange?.role === 'admin' && adminCount <= 1) {
         alert("Harus ada setidaknya satu admin.");
         return;
       }
@@ -107,20 +108,23 @@ export default function Settings() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium ${
-                        u.role === 'admin' ? 'bg-indigo-50 text-indigo-700' : 'bg-gray-100 text-gray-700'
+                        u.role === 'admin' ? 'bg-indigo-50 text-indigo-700' : 
+                        u.role === 'supervisor' ? 'bg-green-50 text-green-700' :
+                        'bg-gray-100 text-gray-700'
                       }`}>
-                        {u.role === 'admin' ? 'Admin' : 'User'}
+                        {u.role === 'admin' ? 'Admin' : u.role === 'supervisor' ? 'Supervisor' : 'User'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {role === 'admin' ? (
                         <select
                           value={u.role}
-                          onChange={(e) => handleRoleChange(u.id, e.target.value as 'admin' | 'user')}
+                          onChange={(e) => handleRoleChange(u.id, e.target.value as 'admin' | 'supervisor' | 'user')}
                           disabled={u.id === user?.uid}
                           className="block w-full pl-3 pr-8 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-500"
                         >
                           <option value="admin">Admin</option>
+                          <option value="supervisor">Supervisor</option>
                           <option value="user">User</option>
                         </select>
                       ) : (
