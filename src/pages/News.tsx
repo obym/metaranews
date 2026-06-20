@@ -58,8 +58,8 @@ export default function News() {
     return () => unsubscribe();
   }, [user, role]);
 
-  const handleOpenModal = (newsItem?: NewsArticle) => {
-    if (newsItem) {
+  const handleOpenModal = (newsItem?: NewsArticle | null) => {
+    if (newsItem && newsItem.id) {
       setEditingNews(newsItem);
       setFormData({
         title: newsItem.title || "",
@@ -135,7 +135,7 @@ export default function News() {
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
           {role !== "supervisor" && (
             <button
-              onClick={() => handleOpenModal()}
+              onClick={(e) => { e.preventDefault(); handleOpenModal(); }}
               className="inline-flex items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:w-auto"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -188,7 +188,7 @@ export default function News() {
                           {role !== "supervisor" && (
                             <>
                               <button
-                                onClick={() => handleOpenModal(news)}
+                                onClick={(e) => { e.preventDefault(); handleOpenModal(news); }}
                                 className="text-indigo-600 hover:text-indigo-900 mr-4"
                               >
                                 <Edit2 className="h-4 w-4" />
@@ -219,22 +219,47 @@ export default function News() {
         </div>
       </div>
 
+      {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-10 overflow-y-auto">
-          <div className="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true"></div>
-            <span className="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">&#8203;</span>
-            <div className="inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">
+        <div
+          className="fixed z-[100] inset-0 overflow-y-auto"
+          aria-labelledby="modal-title"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div
+              className="fixed inset-0 bg-gray-500/75 transition-opacity"
+              aria-hidden="true"
+              onClick={handleCloseModal}
+            ></div>
+            <span
+              className="hidden sm:inline-block sm:align-middle sm:h-screen"
+              aria-hidden="true"
+            >
+              &#8203;
+            </span>
+            <div className="relative inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+              <div className="absolute top-0 right-0 pt-4 pr-4">
+                <button
+                  type="button"
+                  className="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
+                  onClick={handleCloseModal}
+                >
+                  <span className="sr-only">Close</span>
+                  <X className="h-6 w-6" aria-hidden="true" />
+                </button>
+              </div>
+              <div className="sm:flex sm:items-start">
+                <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                  <h3
+                    className="text-lg leading-6 font-medium text-gray-900"
+                    id="modal-title"
+                  >
                     {editingNews ? "Edit Berita" : "Tambah Berita"}
                   </h3>
-                  <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-500">
-                    <X className="h-6 w-6" />
-                  </button>
-                </div>
-                <form id="news-form" onSubmit={handleSubmit} className="space-y-4">
+                  <div className="mt-4">
+                    <form id="news-form" onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Judul Artikel *</label>
                     <input
@@ -290,20 +315,22 @@ export default function News() {
                       placeholder="Nama staf dokumentasi"
                     />
                   </div>
-                </form>
+                    </form>
+                  </div>
+                </div>
               </div>
-              <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+              <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                 <button
                   type="submit"
                   form="news-form"
-                  className="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
                 >
                   Simpan
                 </button>
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:mt-0 sm:w-auto sm:text-sm"
                 >
                   Batal
                 </button>
