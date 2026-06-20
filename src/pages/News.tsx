@@ -8,7 +8,6 @@ import {
   deleteDoc,
   doc,
   serverTimestamp,
-  where,
   orderBy,
 } from "firebase/firestore";
 import { db } from "../firebase";
@@ -46,9 +45,7 @@ export default function News() {
   useEffect(() => {
     if (!user) return;
 
-    const q = (role === "admin" || role === "supervisor")
-      ? query(collection(db, "news"), orderBy("createdAt", "desc"))
-      : query(collection(db, "news"), where("ownerId", "==", user.uid), orderBy("createdAt", "desc"));
+    const q = query(collection(db, "news"), orderBy("createdAt", "desc"));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const newsData: NewsArticle[] = [];

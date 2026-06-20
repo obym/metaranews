@@ -58,7 +58,7 @@ service cloud.firestore {
     // ===============================================================
 
     match /clients/{clientId} {
-      allow read: if isAuthenticated() && (resource == null || isAdmin() || isSupervisor() || resource.data.ownerId == request.auth.uid);
+      allow read: if isAuthenticated() && (isAdmin() || isSupervisor() || resource.data.ownerId == request.auth.uid);
       allow create: if isAuthenticated() && 
                     hasRequiredFields(['name', 'ownerId', 'createdAt']) && 
                     isValidClient(request.resource.data) && 
@@ -71,7 +71,7 @@ service cloud.firestore {
     }
 
     match /news/{newsId} {
-      allow read: if isAuthenticated() && (resource == null || isAdmin() || isSupervisor() || resource.data.ownerId == request.auth.uid);
+      allow read: if isAuthenticated();
       allow create: if isAuthenticated() && hasRequiredFields(['title', 'ownerId', 'createdAt']) && uidUnchanged();
       allow update: if isAuthenticated() && (isDocOwner() || isAdmin()) && uidNotModified();
       allow delete: if isAuthenticated() && (isDocOwner() || isAdmin());
