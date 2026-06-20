@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
-import { Users, FileText, CircleDollarSign, Wallet } from 'lucide-react';
-import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { Users, FileText, CircleDollarSign, Wallet, TrendingUp } from 'lucide-react';
+import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell, ComposedChart, Area, Line, CartesianGrid, Legend, YAxis } from 'recharts';
 
 export default function Dashboard() {
   const { user, role } = useAuth();
@@ -13,7 +13,8 @@ export default function Dashboard() {
     invoices: 0,
     clients: 0,
     loyalty: 78,
-    incentiveFee: 0
+    incentiveFee: 0,
+    netRevenue: 0
   });
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
   const [recentInvoices, setRecentInvoices] = useState<any[]>([]);
@@ -75,6 +76,7 @@ export default function Dashboard() {
     let invCount = 0;
     
     const monthlyRev = new Array(12).fill(0);
+    const monthlyInc = new Array(12).fill(0);
     const invoicesOnly = allLettersData.filter(l => l.type === 'invoice');
 
     invoicesOnly.forEach(data => {
@@ -84,6 +86,7 @@ export default function Dashboard() {
 
       if (dataYear === currentYear) {
         monthlyRev[dataMonth] += (data.paidAmount || 0);
+        monthlyInc[dataMonth] += (data.incentiveFee || 0);
       }
 
       let includeInStats = false;
@@ -107,12 +110,15 @@ export default function Dashboard() {
       invoices: invCount,
       clients: clientCount,
       loyalty: 78,
-      incentiveFee: totalIncentive
+      incentiveFee: totalIncentive,
+      netRevenue: revenue - totalIncentive
     });
 
     setMonthlyData(monthlyRev.map((val, idx) => ({
       name: monthNames[idx],
-      revenue: val
+      revenue: val,
+      incentive: monthlyInc[idx],
+      net: val - monthlyInc[idx]
     })));
 
   }, [selectedMonth, allLettersData, clientCount]);
@@ -169,53 +175,49 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-500">
+            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
               <CircleDollarSign size={20} strokeWidth={2.5} />
             </div>
             <span className="text-[13px] font-semibold text-gray-500">Total Dana Masuk</span>
           </div>
           <div className="flex items-end justify-between">
             <span className="text-[28px] font-bold text-gray-900 tracking-tight leading-none">{formatCurrency(stats.totalRevenue)}</span>
-            <span className="text-[11px] font-extrabold text-green-600 bg-green-50/80 px-2 py-0.5 rounded flex items-center gap-1">+12% &uarr;</span>
           </div>
         </div>
         
         <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-500">
-              <FileText size={20} strokeWidth={2.5} />
-            </div>
-            <span className="text-[13px] font-semibold text-gray-500">Invoices</span>
-          </div>
-          <div className="flex items-end justify-between">
-            <span className="text-[28px] font-bold text-gray-900 tracking-tight leading-none">{stats.invoices.toLocaleString('id-ID')}</span>
-            <span className="text-[11px] font-extrabold text-green-600 bg-green-50/80 px-2 py-0.5 rounded flex items-center gap-1">+5% &uarr;</span>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
-              <Users size={20} strokeWidth={2.5} />
-            </div>
-            <span className="text-[13px] font-semibold text-gray-500">Clients</span>
-          </div>
-          <div className="flex items-end justify-between">
-            <span className="text-[28px] font-bold text-gray-900 tracking-tight leading-none">{stats.clients.toLocaleString('id-ID')}</span>
-            <span className="text-[11px] font-extrabold text-green-600 bg-green-50/80 px-2 py-0.5 rounded flex items-center gap-1">+2% &uarr;</span>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-500">
+            <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-500">
               <Wallet size={20} strokeWidth={2.5} />
             </div>
             <span className="text-[13px] font-semibold text-gray-500">Fee Insentif / Cashback</span>
           </div>
           <div className="flex items-end justify-between">
             <span className="text-[28px] font-bold text-gray-900 tracking-tight leading-none">{formatCurrency(stats.incentiveFee)}</span>
-            <span className="text-[11px] font-extrabold text-gray-500 bg-gray-50 px-2 py-0.5 rounded flex items-center gap-1">0%</span>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-500">
+              <TrendingUp size={20} strokeWidth={2.5} />
+            </div>
+            <span className="text-[13px] font-semibold text-gray-500">Sisa Dana</span>
+          </div>
+          <div className="flex items-end justify-between">
+            <span className="text-[28px] font-bold text-gray-900 tracking-tight leading-none">{formatCurrency(stats.netRevenue)}</span>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-500">
+              <FileText size={20} strokeWidth={2.5} />
+            </div>
+            <span className="text-[13px] font-semibold text-gray-500">Total Invoices</span>
+          </div>
+          <div className="flex items-end justify-between">
+            <span className="text-[28px] font-bold text-gray-900 tracking-tight leading-none">{stats.invoices.toLocaleString('id-ID')}</span>
           </div>
         </div>
       </div>
@@ -229,26 +231,38 @@ export default function Dashboard() {
               {formatCurrency(monthlyData[new Date().getMonth()]?.revenue || 0)}
             </div>
           </div>
-          <div className="h-56 w-full">
+          <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+              <ComposedChart data={monthlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorNet" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis 
                   dataKey="name" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 11, fill: '#cbd5e1', fontWeight: 600 }} 
-                  dy={15} 
+                  tick={{ fontSize: 11, fill: '#64748b', fontWeight: 500 }} 
+                  dy={10} 
+                />
+                <YAxis 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fill: '#64748b' }}
+                  tickFormatter={(val) => formatCurrency(val, true)}
                 />
                 <Tooltip 
-                  content={<CustomTooltip />} 
-                  cursor={{ fill: 'transparent' }} 
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  formatter={(value: number, name: string) => [formatCurrency(value), name === 'revenue' ? 'Dana Masuk' : name === 'net' ? 'Sisa Dana' : 'Fee Insentif']}
                 />
-                <Bar dataKey="revenue" radius={[8, 8, 8, 8]} barSize={26}>
-                  {monthlyData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={index === new Date().getMonth() ? '#2563eb' : '#f1f5f9'} className="transition-colors duration-300" />
-                  ))}
-                </Bar>
-              </BarChart>
+                <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
+                <Bar dataKey="revenue" name="Dana Masuk" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={16} />
+                <Area type="monotone" dataKey="net" name="Sisa Dana" fillOpacity={1} fill="url(#colorNet)" stroke="#22c55e" strokeWidth={2} />
+                <Line type="monotone" dataKey="incentive" name="Fee Insentif" stroke="#f97316" strokeWidth={2} dot={{ r: 3 }} />
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
         </div>
