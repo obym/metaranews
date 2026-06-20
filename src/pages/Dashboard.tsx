@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
-import { Users, FileText, CircleDollarSign, Wallet, TrendingUp } from 'lucide-react';
+import { Users, FileText, CircleDollarSign, Wallet, TrendingUp, Newspaper, MapPin, UserCheck, Camera, PenTool } from 'lucide-react';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell, ComposedChart, Area, Line, CartesianGrid, Legend, YAxis } from 'recharts';
 
 export default function Dashboard() {
@@ -17,10 +17,19 @@ export default function Dashboard() {
     netRevenue: 0
   });
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
+  const [newsStats, setNewsStats] = useState({
+    byArea: [] as {name: string, count: number}[],
+    byReporter: [] as {name: string, count: number}[],
+    byWriter: [] as {name: string, count: number}[],
+    byDocumentation: [] as {name: string, count: number}[],
+    byDate: [] as {date: string, count: number, day: string}[]
+  });
   const [recentInvoices, setRecentInvoices] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
   const [allLettersData, setAllLettersData] = useState<any[]>([]);
   const [clientCount, setClientCount] = useState<number>(0);
+  const [newsData, setNewsData] = useState<any[]>([]);
+  const [selectedNewsCategory, setSelectedNewsCategory] = useState<'area' | 'reporter' | 'writer' | 'documentation'>('area');
   const [selectedMonth, setSelectedMonth] = useState<number | 'all'>('all');
   const currentYear = new Date().getFullYear();
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -46,7 +55,6 @@ export default function Dashboard() {
         const allLettersSnapshot = await getDocs(allLettersQuery);
         
         const allLetters: any[] = [];
-        
         allLettersSnapshot.forEach(doc => {
           const data = doc.data();
           allLetters.push({ id: doc.id, clientName: clientNames.get(data.clientId) || data.clientName || 'Unknown', ...data });
@@ -55,6 +63,15 @@ export default function Dashboard() {
         setAllLettersData(allLetters);
         setClientCount(clientsSnapshot.size);
         
+        // Fetch news data
+        const newsQuery = query(collection(db, 'news'));
+        const newsSnapshot = await getDocs(newsQuery);
+        const newsItems: any[] = [];
+        newsSnapshot.forEach(doc => {
+          newsItems.push({ id: doc.id, ...doc.data() });
+        });
+        setNewsData(newsItems);
+
         allLetters.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         
         const invoicesOnly = allLetters.filter(l => l.type === 'invoice');
@@ -122,6 +139,80 @@ export default function Dashboard() {
     })));
 
   }, [selectedMonth, allLettersData, clientCount]);
+
+  useEffect(() => {
+    let filteredNews = newsData;
+    
+    if (selectedMonth !== 'all') {
+      filteredNews = newsData.filter(news => {
+        // use publishDate if available, else createdAt
+        let d = null;
+        if (news.publishDate) d = new Date(news.publishDate);
+        else if (news.createdAt?.toDate) d = news.createdAt.toDate();
+        else if (news.createdAt) d = new Date(news.createdAt);
+        
+        if (d) {
+          return d.getMonth() === selectedMonth && d.getFullYear() === currentYear;
+        }
+        return false;
+      });
+    }
+
+    const areaMap: Record<string, number> = {};
+    const reporterMap: Record<string, number> = {};
+    const writerMap: Record<string, number> = {};
+    const docMap: Record<string, number> = {};
+    const dateMap: Record<string, {count: number, d: Date}> = {};
+
+    filteredNews.forEach(news => {
+      if (news.area) areaMap[news.area] = (areaMap[news.area] || 0) + 1;
+      if (news.reporter) reporterMap[news.reporter] = (reporterMap[news.reporter] || 0) + 1;
+      if (news.writer) writerMap[news.writer] = (writerMap[news.writer] || 0) + 1;
+      if (news.documentation) docMap[news.documentation] = (docMap[news.documentation] || 0) + 1;
+
+      let dateStr = '';
+      let dObj = null;
+      if (news.publishDate) {
+        dObj = new Date(news.publishDate);
+      } else if (news.createdAt?.toDate) {
+        dObj = news.createdAt.toDate();
+      } else if (news.createdAt) {
+        dObj = new Date(news.createdAt);
+      }
+
+      if (dObj) {
+        dateStr = dObj.toISOString().split('T')[0];
+        if (!dateMap[dateStr]) {
+          dateMap[dateStr] = { count: 0, d: dObj };
+        }
+        dateMap[dateStr].count += 1;
+      }
+    });
+
+    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+    const sortedDates = Object.keys(dateMap).sort().map(k => {
+      const d = dateMap[k].d;
+      const dayName = days[d.getDay()];
+      return {
+        date: k,
+        day: dayName,
+        count: dateMap[k].count
+      };
+    });
+
+    const sortMap = (m: Record<string, number>) => Object.entries(m)
+      .sort((a,b) => b[1] - a[1])
+      .map(([name, count]) => ({name, count}));
+
+    setNewsStats({
+      byArea: sortMap(areaMap),
+      byReporter: sortMap(reporterMap),
+      byWriter: sortMap(writerMap),
+      byDocumentation: sortMap(docMap),
+      byDate: sortedDates
+    });
+  }, [newsData, selectedMonth]);
 
   const formatCurrency = (val: number, compact = false) => {
     if (compact) {
@@ -264,6 +355,144 @@ export default function Dashboard() {
                 <Line type="monotone" dataKey="incentive" name="Fee Insentif" stroke="#f97316" strokeWidth={2} dot={{ r: 3 }} />
               </ComposedChart>
             </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* News Stats Section */}
+      <div className="mb-8">
+        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <Newspaper size={24} className="text-blue-500" />
+          Statistik Publikasi Berita
+        </h2>
+        
+        {/* News Chart */}
+        <div className="grid grid-cols-1 gap-6 mb-6">
+          <div className="bg-white rounded-[24px] p-8 shadow-sm border border-gray-100 w-full hover:shadow-md transition-shadow">
+            <div className="mb-8">
+              <h3 className="text-[13px] font-bold text-gray-400 mb-2">Grafik Publikasi per Tanggal</h3>
+              <div className="text-[32px] font-bold text-gray-900 leading-none">
+                {newsStats.byDate.reduce((acc, curr) => acc + curr.count, 0)} <span className="text-lg text-gray-500 font-medium">Berita</span>
+              </div>
+            </div>
+            {newsStats.byDate.length > 0 ? (
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={newsStats.byDate} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis 
+                      dataKey="date" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fontSize: 11, fill: '#64748b', fontWeight: 500 }} 
+                      tickFormatter={(val) => {
+                        const row = newsStats.byDate.find(d => d.date === val);
+                        return row ? `${row.day.substring(0,3)}, ${val.substring(5)}` : val;
+                      }}
+                      dy={10} 
+                    />
+                    <YAxis 
+                      allowDecimals={false}
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 11, fill: '#64748b' }}
+                    />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                      labelFormatter={(label) => {
+                        const row = newsStats.byDate.find(d => d.date === label);
+                        return row ? `${row.day}, ${label}` : label;
+                      }}
+                      formatter={(value: number) => [value, 'Jumlah Berita']}
+                    />
+                    <Bar dataKey="count" name="Jumlah Berita" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={32}>
+                      {newsStats.byDate.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill="#ef4444" />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-64 flex flex-col items-center justify-center text-gray-400">
+                <Newspaper className="w-12 h-12 mb-3 text-gray-200" />
+                <p>Belum ada data publikasi berita.</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Category Chart */}
+        <div className="grid grid-cols-1 mb-6">
+          <div className="bg-white rounded-[24px] p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+              <div>
+                <h3 className="text-[13px] font-bold text-gray-400 mb-1">Distribusi per Kategori</h3>
+                <div className="text-xl font-bold text-gray-900 leading-none">
+                  {selectedNewsCategory === 'area' ? 'Daerah Liputan' :
+                   selectedNewsCategory === 'reporter' ? 'Wartawan' :
+                   selectedNewsCategory === 'writer' ? 'Penulis' : 'Dokumentasi'}
+                </div>
+              </div>
+              <select
+                value={selectedNewsCategory}
+                onChange={(e) => setSelectedNewsCategory(e.target.value as any)}
+                className="text-sm border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 pl-3 pr-10 bg-gray-50 text-gray-800 font-medium"
+              >
+                <option value="area">Daerah Liputan</option>
+                <option value="reporter">Wartawan</option>
+                <option value="writer">Penulis</option>
+                <option value="documentation">Dokumentasi</option>
+              </select>
+            </div>
+            
+            {(() => {
+              const data = 
+                selectedNewsCategory === 'area' ? newsStats.byArea :
+                selectedNewsCategory === 'reporter' ? newsStats.byReporter :
+                selectedNewsCategory === 'writer' ? newsStats.byWriter :
+                newsStats.byDocumentation;
+
+              if (data.length === 0) {
+                return (
+                  <div className="h-64 flex flex-col items-center justify-center text-gray-400">
+                    <p>Belum ada data untuk kategori ini.</p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis 
+                        dataKey="name" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fontSize: 11, fill: '#64748b', fontWeight: 500 }} 
+                        dy={10} 
+                      />
+                      <YAxis 
+                        allowDecimals={false}
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 11, fill: '#64748b' }}
+                      />
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                        formatter={(value: number) => [value, 'Jumlah Berita']}
+                      />
+                      <Bar dataKey="count" name="Jumlah" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={40}>
+                        {data.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill="#3b82f6" />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>
