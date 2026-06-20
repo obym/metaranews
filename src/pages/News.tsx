@@ -23,6 +23,7 @@ interface NewsArticle {
   reporter: string;
   writer: string;
   documentation: string;
+  publishDate?: string;
   createdAt: any;
 }
 
@@ -40,6 +41,7 @@ export default function News() {
     reporter: "",
     writer: "",
     documentation: "",
+    publishDate: "",
   });
 
   useEffect(() => {
@@ -67,6 +69,7 @@ export default function News() {
         reporter: newsItem.reporter || "",
         writer: newsItem.writer || "",
         documentation: newsItem.documentation || "",
+        publishDate: newsItem.publishDate || "",
       });
     } else {
       setEditingNews(null);
@@ -76,6 +79,7 @@ export default function News() {
         reporter: "",
         writer: "",
         documentation: "",
+        publishDate: "",
       });
     }
     setIsModalOpen(true);
@@ -157,7 +161,8 @@ export default function News() {
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Wartawan</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Penulis</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Dokumentasi</th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Tanggal</th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Tanggal Tayang</th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Dibuat Pada</th>
                     <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6"><span className="sr-only">Aksi</span></th>
                   </tr>
                 </thead>
@@ -181,7 +186,10 @@ export default function News() {
                         <td data-label="Dokumentasi" className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           {news.documentation || "-"}
                         </td>
-                        <td data-label="Tanggal" className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        <td data-label="Tanggal Tayang" className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {news.publishDate ? format(new Date(news.publishDate), "dd MMM yyyy", { locale: idLocale }) : "-"}
+                        </td>
+                        <td data-label="Dibuat Pada" className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           {news.createdAt ? format(dateAdded, "dd MMM yyyy", { locale: idLocale }) : "-"}
                         </td>
                         <td data-label="Aksi" className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
@@ -207,7 +215,7 @@ export default function News() {
                   })}
                   {newsList.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="px-3 py-8 text-center text-sm text-gray-500">
+                      <td colSpan={8} className="px-3 py-8 text-center text-sm text-gray-500">
                         Belum ada data berita
                       </td>
                     </tr>
@@ -302,6 +310,15 @@ export default function News() {
                       onChange={(e) => setFormData({ ...formData, writer: e.target.value })}
                       className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-red-500 focus:outline-none focus:ring-red-500 sm:text-sm"
                       placeholder="Nama penulis"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Tanggal Tayang</label>
+                    <input
+                      type="date"
+                      value={formData.publishDate}
+                      onChange={(e) => setFormData({ ...formData, publishDate: e.target.value })}
+                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-red-500 focus:outline-none focus:ring-red-500 sm:text-sm"
                     />
                   </div>
                   <div>
