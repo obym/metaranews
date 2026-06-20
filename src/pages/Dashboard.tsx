@@ -223,8 +223,8 @@ export default function Dashboard() {
       </div>
 
       {/* Middle Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-[24px] p-8 shadow-sm border border-gray-100 lg:col-span-2 hover:shadow-md transition-shadow">
+      <div className="grid grid-cols-1 gap-6 mb-8">
+        <div className="bg-white rounded-[24px] p-8 shadow-sm border border-gray-100 w-full hover:shadow-md transition-shadow">
           <div className="mb-8">
             <h3 className="text-[13px] font-bold text-gray-400 mb-2">Dana Masuk Bulanan</h3>
             <div className="text-[32px] font-bold text-gray-900 leading-none">
@@ -265,24 +265,6 @@ export default function Dashboard() {
               </ComposedChart>
             </ResponsiveContainer>
           </div>
-        </div>
-
-        <div className="bg-[#1e3a8a] rounded-[24px] p-8 shadow-sm text-white lg:col-span-1 flex flex-col justify-between relative overflow-hidden group">
-          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-56 h-56 rounded-full bg-blue-500/40 blur-[40px] pointer-events-none transition-transform duration-700 group-hover:scale-110"></div>
-          <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-40 h-40 rounded-full bg-[#38bdf8]/20 blur-[30px] pointer-events-none transition-transform duration-700 group-hover:scale-110"></div>
-          
-          <div className="relative z-10">
-            <span className="inline-block bg-white text-[#1e3a8a] text-[10px] font-black px-3 py-1 rounded-full mb-6 tracking-widest">
-              NEW
-            </span>
-            <h3 className="text-[26px] font-bold mb-4 leading-tight tracking-tight">We have added new invoicing templates!</h3>
-            <p className="text-blue-100 text-[13px] mb-8 leading-relaxed font-medium">
-              New templates focused on helping you improve your business
-            </p>
-          </div>
-          <button className="relative z-10 bg-white text-[#1e3a8a] font-bold text-sm py-3.5 px-4 rounded-[14px] w-full hover:bg-gray-50 transition-colors shadow-sm">
-            Download Now
-          </button>
         </div>
       </div>
 

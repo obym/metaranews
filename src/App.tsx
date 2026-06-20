@@ -18,6 +18,7 @@ import Settings from './pages/Settings';
 import Counters from './pages/Counters';
 import Payments from './pages/Payments';
 import Documents from './pages/Documents';
+import News from './pages/News';
 
 export default function App() {
   return (
@@ -35,6 +36,7 @@ export default function App() {
               <Route path="/letters/:id" element={<LetterView />} />
               <Route path="/payments" element={<Payments />} />
               <Route path="/documents" element={<Documents />} />
+              <Route path="/news" element={<News />} />
               <Route path="/counters" element={<Counters />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
