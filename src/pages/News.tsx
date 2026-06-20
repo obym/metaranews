@@ -12,7 +12,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../contexts/AuthContext";
-import { Plus, Edit2, Trash2, X } from "lucide-react";
+import { Plus, Edit2, Trash2, X, Search } from "lucide-react";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 
@@ -34,6 +34,7 @@ export default function News() {
   const [editingNews, setEditingNews] = useState<NewsArticle | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   
   const [formData, setFormData] = useState({
     title: "",
@@ -127,6 +128,23 @@ export default function News() {
     }
   };
 
+  const filteredAndSortedNews = [...newsList]
+    .filter(news => {
+      const searchLower = searchQuery.toLowerCase();
+      return (
+        (news.title?.toLowerCase() || "").includes(searchLower) ||
+        (news.reporter?.toLowerCase() || "").includes(searchLower) ||
+        (news.writer?.toLowerCase() || "").includes(searchLower) ||
+        (news.area?.toLowerCase() || "").includes(searchLower) ||
+        (news.documentation?.toLowerCase() || "").includes(searchLower)
+      );
+    })
+    .sort((a, b) => {
+      const dateA = a.publishDate ? new Date(a.publishDate).getTime() : 0;
+      const dateB = b.publishDate ? new Date(b.publishDate).getTime() : 0;
+      return dateB - dateA; // Sort newest first
+    });
+
   return (
     <div>
       <div className="sm:flex sm:items-center">
@@ -149,7 +167,22 @@ export default function News() {
         </div>
       </div>
 
-      <div className="mt-8 flex flex-col mobile-cards">
+      <div className="mt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="relative w-full sm:max-w-md">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+            <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
+          </div>
+          <input
+            type="text"
+            className="block w-full rounded-md border border-gray-300 bg-white py-2 pl-10 pr-3 text-sm placeholder-gray-500 focus:border-red-500 focus:text-gray-900 focus:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-red-500 sm:text-sm"
+            placeholder="Cari berita..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-col mobile-cards">
         <div className="-my-2 sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
             <div className="shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
@@ -162,13 +195,11 @@ export default function News() {
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Penulis</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Dokumentasi</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Tanggal Tayang</th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Dibuat Pada</th>
                     <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6"><span className="sr-only">Aksi</span></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {newsList.map((news) => {
-                    const dateAdded = news.createdAt?.toDate ? news.createdAt.toDate() : new Date();
+                  {filteredAndSortedNews.map((news) => {
                     return (
                       <tr key={news.id} className="hover:bg-gray-50 transition-colors">
                         <td data-label="Judul Artikel" className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
@@ -188,9 +219,6 @@ export default function News() {
                         </td>
                         <td data-label="Tanggal Tayang" className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           {news.publishDate ? format(new Date(news.publishDate), "dd MMM yyyy", { locale: idLocale }) : "-"}
-                        </td>
-                        <td data-label="Dibuat Pada" className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {news.createdAt ? format(dateAdded, "dd MMM yyyy", { locale: idLocale }) : "-"}
                         </td>
                         <td data-label="Aksi" className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           {role !== "supervisor" && (
@@ -213,9 +241,9 @@ export default function News() {
                       </tr>
                     );
                   })}
-                  {newsList.length === 0 && (
+                  {filteredAndSortedNews.length === 0 && (
                     <tr>
-                      <td colSpan={8} className="px-3 py-8 text-center text-sm text-gray-500">
+                      <td colSpan={7} className="px-3 py-8 text-center text-sm text-gray-500">
                         Belum ada data berita
                       </td>
                     </tr>
