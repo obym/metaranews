@@ -41,10 +41,9 @@ export default function Login() {
         <div>
           <div className="mx-auto flex items-center justify-center">
             <img 
-              src="https://lh3.googleusercontent.com/d/1kwvd_i_n0IWw59fxQEnVD36mqEp7n1iA" 
+              src="/logo.png" 
               alt="Metaranews Logo" 
               className="h-24 w-auto object-contain"
-              referrerPolicy="no-referrer"
             />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
