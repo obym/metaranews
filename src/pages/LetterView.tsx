@@ -198,7 +198,6 @@ export default function LetterView() {
               src={logoBase64 || "/logo.png"} 
               alt="Watermark" 
               className="w-[600px] h-auto object-contain"
-              crossOrigin="anonymous"
             />
           </div>
 
@@ -209,7 +208,6 @@ export default function LetterView() {
                 src={logoBase64 || "/logo.png"} 
                 alt="Metaranews Logo" 
                 className="h-32 w-auto object-contain mt-2"
-                crossOrigin="anonymous"
               />
             </div>
             <div className="w-2/3 text-right pr-6 mt-4">
