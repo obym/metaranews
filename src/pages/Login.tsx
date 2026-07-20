@@ -41,7 +41,7 @@ export default function Login() {
         <div>
           <div className="mx-auto flex items-center justify-center">
             <img 
-              src="/logo.png" 
+              src="/logo.png?v=4" 
               alt="Metaranews Logo" 
               className="h-24 w-auto object-contain"
             />

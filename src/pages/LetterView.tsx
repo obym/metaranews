@@ -56,7 +56,7 @@ export default function LetterView() {
     // Load logo as base64 to avoid html2canvas CORS issues when generating PDF
     const loadLogo = async () => {
       try {
-        const response = await fetch('/logo.png');
+        const response = await fetch('/logo.png?v=4');
         const blob = await response.blob();
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -195,7 +195,7 @@ export default function LetterView() {
           {/* Watermark */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] z-0">
             <img 
-              src={logoBase64 || "/logo.png"} 
+              src={logoBase64 || "/logo.png?v=4"} 
               alt="Watermark" 
               className="w-[600px] h-auto object-contain"
             />
@@ -205,7 +205,7 @@ export default function LetterView() {
           <div className="flex justify-between items-start mb-8 relative z-10">
             <div className="w-1/3">
               <img 
-                src={logoBase64 || "/logo.png"} 
+                src={logoBase64 || "/logo.png?v=4"} 
                 alt="Metaranews Logo" 
                 className="h-32 w-auto object-contain mt-2"
               />
