@@ -1,8 +1,45 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script>
+      (function() {
+        try {
+          var originalFetch = window.fetch;
+          var customFetch = originalFetch;
+          Object.defineProperty(window, 'fetch', {
+            get: function() {
+              return customFetch;
+            },
+            set: function(val) {
+              customFetch = val;
+            },
+            configurable: true,
+            enumerable: true
+          });
+        } catch (err) {
+          console.warn('[FetchPatch] Direct redefinition failed:', err);
+          try {
+            var originalFetchProto = window.fetch;
+            var customFetchProto = originalFetchProto;
+            Object.defineProperty(Object.getPrototypeOf(window), 'fetch', {
+              get: function() {
+                return customFetchProto;
+              },
+              set: function(val) {
+                customFetchProto = val;
+              },
+              configurable: true,
+              enumerable: true
+            });
+          } catch (errProto) {
+            console.error('[FetchPatch] Prototype redefinition failed:', errProto);
+          }
+        }
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/logo.png" />
     <title>Metaranews Ad Management System</title>
   </head>
   <body>

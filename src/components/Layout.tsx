@@ -29,8 +29,9 @@ export default function Layout() {
       {/* Sidebar for desktop */}
       <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-white border-r border-gray-200 print:hidden">
         <div className="flex-1 flex flex-col min-h-0">
-          <div className="flex items-center h-16 flex-shrink-0 px-4 bg-red-600">
-            <h1 className="text-xl font-bold text-white">Metaranews.co</h1>
+          <div className="flex items-center h-16 flex-shrink-0 px-4 bg-red-600 gap-3">
+            <img src="/logo.png" alt="Metaranews Logo" className="h-9 w-9 rounded-md object-contain bg-white p-1" />
+            <h1 className="text-lg font-extrabold text-white tracking-wide">Metaranews</h1>
           </div>
           <div className="flex-1 flex flex-col overflow-y-auto">
             <nav className="flex-1 px-2 py-4 space-y-1">
@@ -65,7 +66,10 @@ export default function Layout() {
       {/* Mobile menu */}
       <div className="md:hidden flex flex-col w-full print:hidden">
         <div className="flex items-center justify-between h-16 px-4 bg-red-600 sm:px-6 lg:px-8">
-          <h1 className="text-xl font-bold text-white">Metaranews.co</h1>
+          <div className="flex items-center gap-2.5">
+            <img src="/logo.png" alt="Metaranews Logo" className="h-8 w-8 rounded-md object-contain bg-white p-1" />
+            <h1 className="text-lg font-extrabold text-white tracking-wide">Metaranews</h1>
+          </div>
           <button
             type="button"
             className="text-white hover:text-gray-200 focus:outline-none"
